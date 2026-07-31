@@ -54,6 +54,10 @@ jobs:
           uv run alembic upgrade head
           uv run alembic downgrade base
           uv run alembic upgrade head
+      - name: Install PostgreSQL 17 client
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes postgresql-client-17
       - name: Verify backup and restore
         run: |
           pg_dump -h localhost -U app -d finanzas -Fc -f backup.dump
