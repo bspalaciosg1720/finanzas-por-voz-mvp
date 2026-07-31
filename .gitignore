@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.test-cache/
+.ruff_cache/
+.venv/
+htmlcov/
+.coverage
+
+# Node
+node_modules/
+.expo/
+dist/
+web-build/
+npm-debug.log*
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Editors and operating systems
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Generated exports and temporary audio
+exports/
+tmp/
+*.wav
+*.m4a

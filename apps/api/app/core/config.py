@@ -1,0 +1,53 @@
+from functools import lru_cache
+from typing import Literal
+
+from pydantic import AnyHttpUrl, Field, model_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+        case_sensitive=False,
+    )
+
+    app_env: Literal["development", "test", "staging", "production"] = "development"
+    app_name: str = "Finanzas por Voz API"
+    api_v1_prefix: str = "/api/v1"
+    log_level: str = "INFO"
+    database_url: str = "postgresql+psycopg://app:change-me@localhost:5432/finanzas"
+    jwt_secret: str = Field(default="development-only-secret-change-me", min_length=32)
+    access_token_minutes: int = Field(default=15, ge=5, le=60)
+    refresh_token_days: int = Field(default=30, ge=1, le=90)
+    cors_origins: list[AnyHttpUrl] = [AnyHttpUrl("http://localhost:8081")]
+    public_app_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8081")
+    email_delivery_mode: Literal["file", "smtp"] = "file"
+    email_from: str = "no-reply@finanzas.local"
+    smtp_host: str | None = None
+    smtp_port: int = Field(default=587, ge=1, le=65535)
+    smtp_username: str | None = None
+    smtp_password: str | None = None
+    smtp_use_tls: bool = True
+
+    @model_validator(mode="after")
+    def validate_deployed_environment(self) -> "Settings":
+        if self.app_env not in {"staging", "production"}:
+            return self
+        if "change-me" in self.database_url:
+            raise ValueError("Deployed environments require a real database credential")
+        if self.jwt_secret == "development-only-secret-change-me" or "change-me" in self.jwt_secret:
+            raise ValueError("Deployed environments require a unique JWT secret")
+        if any(origin.host in {"localhost", "127.0.0.1"} for origin in self.cors_origins):
+            raise ValueError("Deployed environments cannot allow localhost CORS origins")
+        if self.email_delivery_mode != "smtp" or not self.smtp_host:
+            raise ValueError("Deployed environments require SMTP email delivery")
+        if self.public_app_url.host in {"localhost", "127.0.0.1"}:
+            raise ValueError("Deployed environments require a public application URL")
+        return self
+
+
+@lru_cache
+def get_settings() -> Settings:
+    return Settings()

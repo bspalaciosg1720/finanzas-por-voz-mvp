@@ -1,0 +1,151 @@
+﻿id,text,type,amount,currency,category,description,date_rule,ambiguity,source
+E001,Gasté ocho mil en almuerzo,expense,8000,COP,Alimentación,Almuerzo,today,none,synthetic_seed
+E002,Pagué setenta y cinco mil por el desayuno,expense,75000,COP,Alimentación,Desayuno,today,none,synthetic_seed
+E003,Compré mercado por dos millones quinientos mil,expense,2500000,COP,Alimentación,Mercado,today,none,synthetic_seed
+E004,Compré gasolina por cincuenta mil,expense,50000,COP,Transporte,Gasolina,today,none,synthetic_seed
+E005,Pagué un millón de taxi,expense,1000000,COP,Transporte,Taxi,today,none,synthetic_seed
+E006,Me cobraron cuarenta mil del bus,expense,40000,COP,Transporte,Bus,today,none,synthetic_seed
+E007,Pagué ochocientos mil en medicamentos,expense,800000,COP,Salud,Medicamentos,today,none,synthetic_seed
+E008,Gasté veintiocho mil quinientos en una consulta médica con la tarjeta,expense,28500,COP,Salud,Consulta médica,today,none,synthetic_seed
+E009,Pagué trescientos cincuenta mil de matrícula con la tarjeta,expense,350000,COP,Educación,Matrícula,today,none,synthetic_seed
+E010,Compré libros por veinticinco mil con la tarjeta,expense,25000,COP,Educación,Libros,today,none,synthetic_seed
+E011,Pagué el arriendo por ciento cincuenta mil con la tarjeta,expense,150000,COP,Vivienda,Arriendo,today,none,synthetic_seed
+E012,Pagué dieciocho mil de energía con la tarjeta,expense,18000,COP,Servicios,Energía,today,none,synthetic_seed
+E013,La factura de internet costó ciento veinte mil con la tarjeta,expense,120000,COP,Servicios,Internet,today,none,synthetic_seed
+E014,Gasté doce mil en cine con la tarjeta,expense,12000,COP,Entretenimiento,Cine,today,none,synthetic_seed
+E015,Compré ropa por noventa mil en efectivo,expense,90000,COP,Compras,Ropa,today,none,synthetic_seed
+E016,Pagué ocho mil en el veterinario en efectivo,expense,8000,COP,Mascotas,Veterinario,today,none,synthetic_seed
+E017,Gasté setenta y cinco mil en el hotel en efectivo,expense,75000,COP,Viajes,Hotel,today,none,synthetic_seed
+E018,Pagué dos millones quinientos mil por un regalo en efectivo,expense,2500000,COP,Otros,Regalo,today,none,synthetic_seed
+E019,Gasté cincuenta mil en almuerzo en efectivo hoy,expense,50000,COP,Alimentación,Almuerzo,today,none,synthetic_seed
+E020,Pagué un millón por el desayuno en efectivo hoy,expense,1000000,COP,Alimentación,Desayuno,today,none,synthetic_seed
+E021,Compré mercado por cuarenta mil en efectivo hoy,expense,40000,COP,Alimentación,Mercado,today,none,synthetic_seed
+E022,Compré gasolina por ochocientos mil desde mi cuenta hoy,expense,800000,COP,Transporte,Gasolina,today,none,synthetic_seed
+E023,Pagué veintiocho mil quinientos de taxi desde mi cuenta hoy,expense,28500,COP,Transporte,Taxi,today,none,synthetic_seed
+E024,Me cobraron trescientos cincuenta mil del bus desde mi cuenta hoy,expense,350000,COP,Transporte,Bus,today,none,synthetic_seed
+E025,Pagué veinticinco mil en medicamentos desde mi cuenta hoy,expense,25000,COP,Salud,Medicamentos,today,none,synthetic_seed
+E026,Gasté ciento cincuenta mil en una consulta médica desde mi cuenta hoy,expense,150000,COP,Salud,Consulta médica,today,none,synthetic_seed
+E027,Pagué dieciocho mil de matrícula desde mi cuenta hoy,expense,18000,COP,Educación,Matrícula,today,none,synthetic_seed
+E028,Compré libros por ciento veinte mil desde mi cuenta hoy,expense,120000,COP,Educación,Libros,today,none,synthetic_seed
+E029,Pagué el arriendo por doce mil para este mes hoy,expense,12000,COP,Vivienda,Arriendo,today,none,synthetic_seed
+E030,Pagué noventa mil de energía para este mes hoy,expense,90000,COP,Servicios,Energía,today,none,synthetic_seed
+E031,La factura de internet costó ocho mil para este mes hoy,expense,8000,COP,Servicios,Internet,today,none,synthetic_seed
+E032,Gasté setenta y cinco mil en cine para este mes hoy,expense,75000,COP,Entretenimiento,Cine,today,none,synthetic_seed
+E033,Compré ropa por dos millones quinientos mil para este mes hoy,expense,2500000,COP,Compras,Ropa,today,none,synthetic_seed
+E034,Pagué cincuenta mil en el veterinario para este mes hoy,expense,50000,COP,Mascotas,Veterinario,today,none,synthetic_seed
+E035,Gasté un millón en el hotel para este mes hoy,expense,1000000,COP,Viajes,Hotel,today,none,synthetic_seed
+E036,Pagué cuarenta mil por un regalo esta semana hoy,expense,40000,COP,Otros,Regalo,today,none,synthetic_seed
+E037,Gasté ochocientos mil en almuerzo esta semana ayer,expense,800000,COP,Alimentación,Almuerzo,yesterday,none,synthetic_seed
+E038,Pagué veintiocho mil quinientos por el desayuno esta semana ayer,expense,28500,COP,Alimentación,Desayuno,yesterday,none,synthetic_seed
+E039,Compré mercado por trescientos cincuenta mil esta semana ayer,expense,350000,COP,Alimentación,Mercado,yesterday,none,synthetic_seed
+E040,Compré gasolina por veinticinco mil esta semana ayer,expense,25000,COP,Transporte,Gasolina,yesterday,none,synthetic_seed
+E041,Pagué ciento cincuenta mil de taxi esta semana ayer,expense,150000,COP,Transporte,Taxi,yesterday,none,synthetic_seed
+E042,Me cobraron dieciocho mil del bus esta semana ayer,expense,18000,COP,Transporte,Bus,yesterday,none,synthetic_seed
+E043,Pagué ciento veinte mil en medicamentos en el centro ayer,expense,120000,COP,Salud,Medicamentos,yesterday,none,synthetic_seed
+E044,Gasté doce mil en una consulta médica en el centro ayer,expense,12000,COP,Salud,Consulta médica,yesterday,none,synthetic_seed
+E045,Pagué noventa mil de matrícula en el centro ayer,expense,90000,COP,Educación,Matrícula,yesterday,none,synthetic_seed
+E046,Compré libros por ocho mil en el centro ayer,expense,8000,COP,Educación,Libros,yesterday,none,synthetic_seed
+E047,Pagué el arriendo por setenta y cinco mil en el centro ayer,expense,75000,COP,Vivienda,Arriendo,yesterday,none,synthetic_seed
+E048,Pagué dos millones quinientos mil de energía en el centro ayer,expense,2500000,COP,Servicios,Energía,yesterday,none,synthetic_seed
+E049,La factura de internet costó cincuenta mil en el centro ayer,expense,50000,COP,Servicios,Internet,yesterday,none,synthetic_seed
+E050,Gasté un millón en cine antes de llegar a casa ayer,expense,1000000,COP,Entretenimiento,Cine,yesterday,none,synthetic_seed
+E051,Compré ropa por cuarenta mil antes de llegar a casa ayer,expense,40000,COP,Compras,Ropa,yesterday,none,synthetic_seed
+E052,Pagué ochocientos mil en el veterinario antes de llegar a casa ayer,expense,800000,COP,Mascotas,Veterinario,yesterday,none,synthetic_seed
+E053,Gasté veintiocho mil quinientos en el hotel antes de llegar a casa ayer,expense,28500,COP,Viajes,Hotel,yesterday,none,synthetic_seed
+E054,Pagué trescientos cincuenta mil por un regalo antes de llegar a casa ayer,expense,350000,COP,Otros,Regalo,yesterday,none,synthetic_seed
+E055,Gasté veinticinco mil en almuerzo antes de llegar a casa esta mañana,expense,25000,COP,Alimentación,Almuerzo,today_morning,none,synthetic_seed
+E056,Pagué ciento cincuenta mil por el desayuno antes de llegar a casa esta mañana,expense,150000,COP,Alimentación,Desayuno,today_morning,none,synthetic_seed
+E057,Compré mercado por dieciocho mil esta mañana,expense,18000,COP,Alimentación,Mercado,today_morning,none,synthetic_seed
+E058,Compré gasolina por ciento veinte mil esta mañana,expense,120000,COP,Transporte,Gasolina,today_morning,none,synthetic_seed
+E059,Pagué doce mil de taxi esta mañana,expense,12000,COP,Transporte,Taxi,today_morning,none,synthetic_seed
+E060,Me cobraron noventa mil del bus esta mañana,expense,90000,COP,Transporte,Bus,today_morning,none,synthetic_seed
+E061,Pagué ocho mil en medicamentos esta mañana,expense,8000,COP,Salud,Medicamentos,today_morning,none,synthetic_seed
+E062,Gasté setenta y cinco mil en una consulta médica esta mañana,expense,75000,COP,Salud,Consulta médica,today_morning,none,synthetic_seed
+E063,Pagué dos millones quinientos mil de matrícula esta mañana,expense,2500000,COP,Educación,Matrícula,today_morning,none,synthetic_seed
+E064,Compré libros por cincuenta mil con la tarjeta esta mañana,expense,50000,COP,Educación,Libros,today_morning,none,synthetic_seed
+E065,Pagué el arriendo por un millón con la tarjeta esta mañana,expense,1000000,COP,Vivienda,Arriendo,today_morning,none,synthetic_seed
+E066,Pagué cuarenta mil de energía con la tarjeta esta mañana,expense,40000,COP,Servicios,Energía,today_morning,none,synthetic_seed
+E067,La factura de internet costó ochocientos mil con la tarjeta esta mañana,expense,800000,COP,Servicios,Internet,today_morning,none,synthetic_seed
+E068,Gasté veintiocho mil quinientos en cine con la tarjeta esta mañana,expense,28500,COP,Entretenimiento,Cine,today_morning,none,synthetic_seed
+E069,Compré ropa por trescientos cincuenta mil con la tarjeta esta mañana,expense,350000,COP,Compras,Ropa,today_morning,none,synthetic_seed
+E070,Pagué veinticinco mil en el veterinario con la tarjeta esta mañana,expense,25000,COP,Mascotas,Veterinario,today_morning,none,synthetic_seed
+E071,Gasté ciento cincuenta mil en el hotel en efectivo esta mañana,expense,150000,COP,Viajes,Hotel,today_morning,none,synthetic_seed
+E072,Pagué dieciocho mil por un regalo en efectivo esta mañana,expense,18000,COP,Otros,Regalo,today_morning,none,synthetic_seed
+E073,Gasté ciento veinte mil en almuerzo en efectivo anoche,expense,120000,COP,Alimentación,Almuerzo,yesterday_night,none,synthetic_seed
+E074,Pagué doce mil por el desayuno en efectivo anoche,expense,12000,COP,Alimentación,Desayuno,yesterday_night,none,synthetic_seed
+E075,Compré mercado por noventa mil en efectivo anoche,expense,90000,COP,Alimentación,Mercado,yesterday_night,none,synthetic_seed
+E076,Compré gasolina por ocho mil en efectivo anoche,expense,8000,COP,Transporte,Gasolina,yesterday_night,none,synthetic_seed
+E077,Pagué setenta y cinco mil de taxi en efectivo anoche,expense,75000,COP,Transporte,Taxi,yesterday_night,none,synthetic_seed
+E078,Me cobraron dos millones quinientos mil del bus desde mi cuenta anoche,expense,2500000,COP,Transporte,Bus,yesterday_night,none,synthetic_seed
+E079,Pagué cincuenta mil en medicamentos desde mi cuenta anoche,expense,50000,COP,Salud,Medicamentos,yesterday_night,none,synthetic_seed
+E080,Gasté un millón en una consulta médica desde mi cuenta anoche,expense,1000000,COP,Salud,Consulta médica,yesterday_night,none,synthetic_seed
+E081,Pagué cuarenta mil de matrícula desde mi cuenta anoche,expense,40000,COP,Educación,Matrícula,yesterday_night,none,synthetic_seed
+E082,Compré libros por ochocientos mil desde mi cuenta anoche,expense,800000,COP,Educación,Libros,yesterday_night,none,synthetic_seed
+E083,Pagué el arriendo por veintiocho mil quinientos desde mi cuenta anoche,expense,28500,COP,Vivienda,Arriendo,yesterday_night,none,synthetic_seed
+E084,Pagué trescientos cincuenta mil de energía desde mi cuenta anoche,expense,350000,COP,Servicios,Energía,yesterday_night,none,synthetic_seed
+E085,La factura de internet costó veinticinco mil para este mes anoche,expense,25000,COP,Servicios,Internet,yesterday_night,none,synthetic_seed
+E086,Gasté ciento cincuenta mil en cine para este mes anoche,expense,150000,COP,Entretenimiento,Cine,yesterday_night,none,synthetic_seed
+E087,Compré ropa por dieciocho mil para este mes anoche,expense,18000,COP,Compras,Ropa,yesterday_night,none,synthetic_seed
+E088,Pagué ciento veinte mil en el veterinario para este mes anoche,expense,120000,COP,Mascotas,Veterinario,yesterday_night,none,synthetic_seed
+E089,Gasté doce mil en el hotel para este mes anoche,expense,12000,COP,Viajes,Hotel,yesterday_night,none,synthetic_seed
+E090,Pagué noventa mil por un regalo para este mes anoche,expense,90000,COP,Otros,Regalo,yesterday_night,none,synthetic_seed
+E091,Gasté ocho mil en almuerzo para este mes,expense,8000,COP,Alimentación,Almuerzo,today,none,synthetic_seed
+E092,Pagué setenta y cinco mil por el desayuno esta semana,expense,75000,COP,Alimentación,Desayuno,today,none,synthetic_seed
+E093,Compré mercado por dos millones quinientos mil esta semana,expense,2500000,COP,Alimentación,Mercado,today,none,synthetic_seed
+E094,Compré gasolina por cincuenta mil esta semana,expense,50000,COP,Transporte,Gasolina,today,none,synthetic_seed
+E095,Pagué un millón de taxi esta semana,expense,1000000,COP,Transporte,Taxi,today,none,synthetic_seed
+E096,Me cobraron cuarenta mil del bus esta semana,expense,40000,COP,Transporte,Bus,today,none,synthetic_seed
+E097,Pagué ochocientos mil en medicamentos esta semana,expense,800000,COP,Salud,Medicamentos,today,none,synthetic_seed
+E098,Gasté veintiocho mil quinientos en una consulta médica esta semana,expense,28500,COP,Salud,Consulta médica,today,none,synthetic_seed
+E099,Pagué trescientos cincuenta mil de matrícula en el centro,expense,350000,COP,Educación,Matrícula,today,none,synthetic_seed
+E100,Compré libros por veinticinco mil en el centro,expense,25000,COP,Educación,Libros,today,none,synthetic_seed
+E101,Pagué el arriendo por ciento cincuenta mil en el centro,expense,150000,COP,Vivienda,Arriendo,today,none,synthetic_seed
+E102,Pagué dieciocho mil de energía en el centro,expense,18000,COP,Servicios,Energía,today,none,synthetic_seed
+E103,La factura de internet costó ciento veinte mil en el centro,expense,120000,COP,Servicios,Internet,today,none,synthetic_seed
+E104,Gasté doce mil en cine en el centro,expense,12000,COP,Entretenimiento,Cine,today,none,synthetic_seed
+E105,Compré ropa por noventa mil en el centro,expense,90000,COP,Compras,Ropa,today,none,synthetic_seed
+E106,Pagué ocho mil en el veterinario antes de llegar a casa,expense,8000,COP,Mascotas,Veterinario,today,none,synthetic_seed
+E107,Gasté setenta y cinco mil en el hotel antes de llegar a casa,expense,75000,COP,Viajes,Hotel,today,none,synthetic_seed
+E108,Pagué dos millones quinientos mil por un regalo antes de llegar a casa,expense,2500000,COP,Otros,Regalo,today,none,synthetic_seed
+E109,Gasté cincuenta mil en almuerzo antes de llegar a casa hoy,expense,50000,COP,Alimentación,Almuerzo,today,none,synthetic_seed
+E110,Pagué un millón por el desayuno antes de llegar a casa hoy,expense,1000000,COP,Alimentación,Desayuno,today,none,synthetic_seed
+E111,Compré mercado por cuarenta mil antes de llegar a casa hoy,expense,40000,COP,Alimentación,Mercado,today,none,synthetic_seed
+E112,Compré gasolina por ochocientos mil antes de llegar a casa hoy,expense,800000,COP,Transporte,Gasolina,today,none,synthetic_seed
+E113,Pagué veintiocho mil quinientos de taxi hoy,expense,28500,COP,Transporte,Taxi,today,none,synthetic_seed
+E114,Me cobraron trescientos cincuenta mil del bus hoy,expense,350000,COP,Transporte,Bus,today,none,synthetic_seed
+E115,Pagué veinticinco mil en medicamentos hoy,expense,25000,COP,Salud,Medicamentos,today,none,synthetic_seed
+E116,Gasté ciento cincuenta mil en una consulta médica hoy,expense,150000,COP,Salud,Consulta médica,today,none,synthetic_seed
+E117,Pagué dieciocho mil de matrícula hoy,expense,18000,COP,Educación,Matrícula,today,none,synthetic_seed
+E118,Compré libros por ciento veinte mil hoy,expense,120000,COP,Educación,Libros,today,none,synthetic_seed
+E119,Pagué el arriendo por doce mil hoy,expense,12000,COP,Vivienda,Arriendo,today,none,synthetic_seed
+E120,Pagué noventa mil de energía con la tarjeta hoy,expense,90000,COP,Servicios,Energía,today,none,synthetic_seed
+I001,Me pagaron noventa mil de salario,income,90000,COP,Salario,Salario,today,none,synthetic_seed
+I002,Recibí un millón de un amigo hoy,income,1000000,COP,Otros ingresos,Dinero de un amigo,today,none,synthetic_seed
+I003,Me consignaron veinticinco mil por un trabajo ayer,income,25000,COP,Trabajo independiente,Trabajo,yesterday,none,synthetic_seed
+I004,Vendí una mesa por noventa mil esta mañana,income,90000,COP,Ventas,Venta de mesa,today_morning,none,synthetic_seed
+I005,Recibí un reembolso de un millón anoche,income,1000000,COP,Reembolsos,Reembolso,yesterday_night,none,synthetic_seed
+I006,Me devolvieron veinticinco mil,income,25000,COP,Reembolsos,Devolución,today,none,synthetic_seed
+I007,Me pagaron noventa mil de salario con la tarjeta hoy,income,90000,COP,Salario,Salario,today,none,synthetic_seed
+I008,Recibí un millón de un amigo con la tarjeta ayer,income,1000000,COP,Otros ingresos,Dinero de un amigo,yesterday,none,synthetic_seed
+I009,Me consignaron veinticinco mil por un trabajo con la tarjeta esta mañana,income,25000,COP,Trabajo independiente,Trabajo,today_morning,none,synthetic_seed
+I010,Vendí una mesa por noventa mil con la tarjeta anoche,income,90000,COP,Ventas,Venta de mesa,yesterday_night,none,synthetic_seed
+I011,Recibí un reembolso de un millón con la tarjeta,income,1000000,COP,Reembolsos,Reembolso,today,none,synthetic_seed
+I012,Me devolvieron veinticinco mil con la tarjeta hoy,income,25000,COP,Reembolsos,Devolución,today,none,synthetic_seed
+I013,Me pagaron noventa mil de salario en efectivo ayer,income,90000,COP,Salario,Salario,yesterday,none,synthetic_seed
+I014,Recibí un millón de un amigo en efectivo esta mañana,income,1000000,COP,Otros ingresos,Dinero de un amigo,today_morning,none,synthetic_seed
+I015,Me consignaron veinticinco mil por un trabajo en efectivo anoche,income,25000,COP,Trabajo independiente,Trabajo,yesterday_night,none,synthetic_seed
+I016,Vendí una mesa por noventa mil en efectivo,income,90000,COP,Ventas,Venta de mesa,today,none,synthetic_seed
+I017,Recibí un reembolso de un millón en efectivo hoy,income,1000000,COP,Reembolsos,Reembolso,today,none,synthetic_seed
+I018,Me devolvieron veinticinco mil en efectivo ayer,income,25000,COP,Reembolsos,Devolución,yesterday,none,synthetic_seed
+I019,Me pagaron noventa mil de salario desde mi cuenta esta mañana,income,90000,COP,Salario,Salario,today_morning,none,synthetic_seed
+I020,Recibí un millón de un amigo desde mi cuenta anoche,income,1000000,COP,Otros ingresos,Dinero de un amigo,yesterday_night,none,synthetic_seed
+I021,Me consignaron veinticinco mil por un trabajo desde mi cuenta,income,25000,COP,Trabajo independiente,Trabajo,today,none,synthetic_seed
+I022,Vendí una mesa por noventa mil desde mi cuenta hoy,income,90000,COP,Ventas,Venta de mesa,today,none,synthetic_seed
+I023,Recibí un reembolso de un millón desde mi cuenta ayer,income,1000000,COP,Reembolsos,Reembolso,yesterday,none,synthetic_seed
+I024,Me devolvieron veinticinco mil desde mi cuenta esta mañana,income,25000,COP,Reembolsos,Devolución,today_morning,none,synthetic_seed
+I025,Me pagaron noventa mil de salario para este mes anoche,income,90000,COP,Salario,Salario,yesterday_night,none,synthetic_seed
+I026,Recibí un millón de un amigo para este mes,income,1000000,COP,Otros ingresos,Dinero de un amigo,today,none,synthetic_seed
+I027,Me consignaron veinticinco mil por un trabajo para este mes hoy,income,25000,COP,Trabajo independiente,Trabajo,today,none,synthetic_seed
+I028,Vendí una mesa por noventa mil para este mes ayer,income,90000,COP,Ventas,Venta de mesa,yesterday,none,synthetic_seed
+I029,Recibí un reembolso de un millón para este mes esta mañana,income,1000000,COP,Reembolsos,Reembolso,today_morning,none,synthetic_seed
+I030,Me devolvieron veinticinco mil para este mes anoche,income,25000,COP,Reembolsos,Devolución,yesterday_night,none,synthetic_seed

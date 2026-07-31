@@ -1,0 +1,7 @@
+session_id,date,participant_code,segment,method_current,voice_context,task_1_success,task_1_seconds,task_2_success,task_2_seconds,task_3_success,task_3_seconds,task_4_success,task_4_seconds,task_5_success,task_5_seconds,help_count,confidence_1_5,voice_preference,notes
+S001,,P001,,,,,,,,,,,,,,,,,
+S002,,P002,,,,,,,,,,,,,,,,,
+S003,,P003,,,,,,,,,,,,,,,,,
+S004,,P004,,,,,,,,,,,,,,,,,
+S005,,P005,,,,,,,,,,,,,,,,,
+

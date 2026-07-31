@@ -1,0 +1,17 @@
+{
+  "name": "finanzas-por-voz",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/mobile",
+    "packages/*"
+  ],
+  "scripts": {
+    "mobile:start": "npm --workspace @finanzas/mobile run start",
+    "mobile:typecheck": "npm --workspace @finanzas/mobile run typecheck",
+    "test:python": "python3 -m unittest discover -s validation -p \"test_*.py\" && python3 -m unittest discover -s research -p \"test_*.py\""
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

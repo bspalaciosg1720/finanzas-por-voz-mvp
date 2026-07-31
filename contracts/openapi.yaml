@@ -1,0 +1,574 @@
+openapi: 3.1.0
+info:
+  title: Finanzas por Voz API
+  version: 0.1.0
+  description: Contrato preliminar del MVP. Sujeto a validación de Fase 0.
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Transactions
+  - name: Voice
+  - name: Categories
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      security: []
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: Usuario registrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Sesión iniciada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      security: []
+      operationId: refreshSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+                  minLength: 20
+      responses:
+        "200":
+          description: Tokens rotados
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenPair"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /transactions:
+    get:
+      tags: [Transactions]
+      operationId: listTransactions
+      parameters:
+        - $ref: "#/components/parameters/FromDate"
+        - $ref: "#/components/parameters/ToDate"
+        - $ref: "#/components/parameters/CategoryId"
+        - name: type
+          in: query
+          schema:
+            $ref: "#/components/schemas/MovementType"
+        - name: query
+          in: query
+          schema:
+            type: string
+            maxLength: 100
+        - name: cursor
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 30
+      responses:
+        "200":
+          description: Página de movimientos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionPage"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+    post:
+      tags: [Transactions]
+      operationId: createTransaction
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionCreate"
+      responses:
+        "201":
+          description: Movimiento creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /transactions/{transaction_id}:
+    parameters:
+      - $ref: "#/components/parameters/TransactionId"
+    get:
+      tags: [Transactions]
+      operationId: getTransaction
+      responses:
+        "200":
+          description: Movimiento
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "404":
+          $ref: "#/components/responses/NotFound"
+    patch:
+      tags: [Transactions]
+      operationId: updateTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransactionUpdate"
+      responses:
+        "200":
+          description: Movimiento actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+    delete:
+      tags: [Transactions]
+      operationId: deleteTransaction
+      responses:
+        "204":
+          description: Movimiento eliminado lógicamente
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /voice/interpretations:
+    post:
+      tags: [Voice]
+      operationId: createVoiceInterpretation
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [audio, timezone, currency]
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                timezone:
+                  type: string
+                  example: America/Bogota
+                currency:
+                  type: string
+                  pattern: "^[A-Z]{3}$"
+                  example: COP
+                locale:
+                  type: string
+                  default: es-CO
+      responses:
+        "201":
+          description: Interpretación lista para confirmar
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VoiceInterpretation"
+        "413":
+          description: Audio demasiado grande
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /voice/interpretations/{interpretation_id}/confirm:
+    post:
+      tags: [Voice]
+      operationId: confirmVoiceInterpretation
+      parameters:
+        - name: interpretation_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoiceConfirmation"
+      responses:
+        "201":
+          description: Movimiento confirmado y creado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "410":
+          description: Interpretación expirada
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/Problem"
+        "422":
+          $ref: "#/components/responses/ValidationError"
+  /categories:
+    get:
+      tags: [Categories]
+      operationId: listCategories
+      responses:
+        "200":
+          description: Categorías disponibles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Category"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: UUID generado por el cliente y estable durante reintentos.
+      schema:
+        type: string
+        format: uuid
+    TransactionId:
+      name: transaction_id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    FromDate:
+      name: from
+      in: query
+      schema:
+        type: string
+        format: date
+    ToDate:
+      name: to
+      in: query
+      schema:
+        type: string
+        format: date
+    CategoryId:
+      name: category_id
+      in: query
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    RegisterRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password, full_name, country_code, timezone, default_currency]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          minLength: 10
+          maxLength: 128
+        full_name:
+          type: string
+          minLength: 2
+          maxLength: 100
+        country_code:
+          type: string
+          pattern: "^[A-Z]{2}$"
+        timezone:
+          type: string
+          example: America/Bogota
+        default_currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+          example: COP
+    LoginRequest:
+      type: object
+      additionalProperties: false
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+    AuthResponse:
+      type: object
+      additionalProperties: false
+      required: [user, tokens]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        tokens:
+          $ref: "#/components/schemas/TokenPair"
+    TokenPair:
+      type: object
+      additionalProperties: false
+      required: [access_token, refresh_token, token_type, expires_in]
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        token_type:
+          type: string
+          const: bearer
+        expires_in:
+          type: integer
+          minimum: 1
+    User:
+      type: object
+      additionalProperties: false
+      required: [id, email, full_name, timezone, default_currency]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        timezone:
+          type: string
+        default_currency:
+          type: string
+    MovementType:
+      type: string
+      enum: [income, expense]
+    TransactionCreate:
+      type: object
+      additionalProperties: false
+      required: [type, amount_minor, currency, occurred_at]
+      properties:
+        type:
+          $ref: "#/components/schemas/MovementType"
+        amount_minor:
+          type: integer
+          minimum: 1
+        currency:
+          type: string
+          pattern: "^[A-Z]{3}$"
+        category_id:
+          type: [string, "null"]
+          format: uuid
+        description:
+          type: string
+          maxLength: 240
+          default: ""
+        occurred_at:
+          type: string
+          format: date-time
+        source:
+          type: string
+          enum: [manual, voice]
+          default: manual
+    TransactionUpdate:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+      properties:
+        type:
+          $ref: "#/components/schemas/MovementType"
+        amount_minor:
+          type: integer
+          minimum: 1
+        category_id:
+          type: [string, "null"]
+          format: uuid
+        description:
+          type: string
+          maxLength: 240
+        occurred_at:
+          type: string
+          format: date-time
+    Transaction:
+      allOf:
+        - $ref: "#/components/schemas/TransactionCreate"
+        - type: object
+          required: [id, created_at, updated_at]
+          properties:
+            id:
+              type: string
+              format: uuid
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    TransactionPage:
+      type: object
+      additionalProperties: false
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Transaction"
+        next_cursor:
+          type: [string, "null"]
+    Category:
+      type: object
+      additionalProperties: false
+      required: [id, name, movement_scope, is_system]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        movement_scope:
+          type: string
+          enum: [income, expense, both]
+        is_system:
+          type: boolean
+    FieldConfidence:
+      type: object
+      additionalProperties:
+        type: number
+        minimum: 0
+        maximum: 1
+    VoiceInterpretation:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - transcript
+        - candidate
+        - confidence
+        - uncertain_fields
+        - expires_at
+      properties:
+        id:
+          type: string
+          format: uuid
+        transcript:
+          type: string
+        candidate:
+          $ref: "#/components/schemas/TransactionCreate"
+        confidence:
+          $ref: "#/components/schemas/FieldConfidence"
+        uncertain_fields:
+          type: array
+          items:
+            type: string
+            enum: [type, amount_minor, category_id, description, occurred_at]
+        expires_at:
+          type: string
+          format: date-time
+    VoiceConfirmation:
+      description: Valores finales revisados por el usuario.
+      allOf:
+        - $ref: "#/components/schemas/TransactionCreate"
+        - type: object
+          required: [accepted_transcript]
+          properties:
+            accepted_transcript:
+              type: boolean
+    Problem:
+      type: object
+      additionalProperties: true
+      required: [type, title, status, detail, trace_id]
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+        trace_id:
+          type: string
+  responses:
+    Unauthorized:
+      description: Credenciales ausentes o inválidas
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    NotFound:
+      description: Recurso inexistente o no accesible para el usuario
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    Conflict:
+      description: Conflicto de estado o clave de idempotencia
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+    ValidationError:
+      description: Entrada inválida
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+

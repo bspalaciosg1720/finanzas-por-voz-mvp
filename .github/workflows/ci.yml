@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: finanzas
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U app -d finanzas"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+psycopg://app:ci-only-password@localhost:5432/finanzas
+      PGPASSWORD: ci-only-password
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
+        with:
+          enable-cache: true
+      - name: Install locked dependencies
+        run: uv sync --locked --package finanzas-api --extra dev
+      - name: Lint
+        run: uv run --package finanzas-api ruff check apps/api
+      - name: API tests
+        run: uv run --package finanzas-api pytest apps/api/tests
+      - name: Verify PostgreSQL migrations
+        working-directory: apps/api
+        run: |
+          uv run alembic upgrade head
+          uv run alembic downgrade base
+          uv run alembic upgrade head
+      - name: Verify backup and restore
+        run: |
+          pg_dump -h localhost -U app -d finanzas -Fc -f backup.dump
+          createdb -h localhost -U app finanzas_restore
+          pg_restore -h localhost -U app -d finanzas_restore --no-owner --no-privileges backup.dump
+          test "$(psql -h localhost -U app -d finanzas_restore -tAc 'select count(*) from categories')" = "11"
+          dropdb -h localhost -U app finanzas_restore
+      - name: Validate OpenAPI contract
+        run: |
+          uv run --package finanzas-api python contracts/validate_openapi.py
+          uv run --package finanzas-api python -c "import pathlib,yaml; yaml.safe_load(pathlib.Path('contracts/openapi.yaml').read_text())"
+
+  mobile:
+    name: Mobile
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: TypeScript
+        run: npm run mobile:typecheck
+      - name: Expo compatibility
+        run: npx expo-doctor
+
+  validation:
+    name: Product validation tools
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Parser tests
+        run: python -m unittest discover -s validation -p "test_*.py"
+      - name: Research tooling tests
+        run: python -m unittest discover -s research -p "test_*.py"
+      - name: Validate dataset
+        run: |
+          python dataset/generate_seed.py
+          python -c "import csv; rows=list(csv.DictReader(open('dataset/voice_phrases_seed.csv', encoding='utf-8-sig'))); assert len(rows) == 150; assert len({row['text'] for row in rows}) == 150"

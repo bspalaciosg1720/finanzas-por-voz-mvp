@@ -1,0 +1,1 @@
+"""Monthly category budgets module."""

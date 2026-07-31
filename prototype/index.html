@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f4f5f2" />
+    <title>Clara — Prototipo de finanzas por voz</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="stage">
+      <aside class="research-panel" aria-label="Controles de la prueba">
+        <p class="eyebrow">PROTOTIPO · FASE 0</p>
+        <h1>Prueba el registro por voz</h1>
+        <p>
+          Selecciona un escenario. El reconocimiento está simulado para evaluar
+          el flujo, no la tecnología.
+        </p>
+        <label for="scenario">Escenario de prueba</label>
+        <select id="scenario">
+          <option value="lunch">1. Almuerzo · interpretación correcta</option>
+          <option value="gas">2. Gasolina · fecha relativa</option>
+          <option value="salary">3. Salario · ingreso</option>
+          <option value="wrong-category">4. Categoría incorrecta</option>
+          <option value="ambiguous">5. Monto ambiguo</option>
+          <option value="no-speech">Extra · voz no reconocida</option>
+        </select>
+        <button class="text-button" id="resetDemo">Reiniciar escenario</button>
+        <div class="research-note">
+          <strong>Qué observar</strong>
+          <span>Tiempo, dudas, campos revisados y confianza al confirmar.</span>
+        </div>
+      </aside>
+
+      <section class="phone" aria-label="Prototipo móvil">
+        <div class="statusbar" aria-hidden="true">
+          <span>9:41</span>
+          <span>● ● ◼</span>
+        </div>
+
+        <div id="app" class="screen" aria-live="polite"></div>
+
+        <nav class="bottom-nav" id="bottomNav" aria-label="Navegación principal">
+          <button data-nav="home" class="nav-item active">
+            <span class="nav-icon">⌂</span><span>Inicio</span>
+          </button>
+          <button data-nav="transactions" class="nav-item">
+            <span class="nav-icon">≡</span><span>Movimientos</span>
+          </button>
+          <button data-nav="budget" class="nav-item">
+            <span class="nav-icon">◎</span><span>Presupuesto</span>
+          </button>
+          <button data-nav="reports" class="nav-item">
+            <span class="nav-icon">▥</span><span>Reportes</span>
+          </button>
+          <button data-nav="profile" class="nav-item">
+            <span class="nav-icon">○</span><span>Perfil</span>
+          </button>
+        </nav>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status"></div>
+    <script src="app.js"></script>
+  </body>
+</html>

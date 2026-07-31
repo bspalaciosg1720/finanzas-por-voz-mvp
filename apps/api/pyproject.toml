@@ -1,0 +1,35 @@
+[project]
+name = "finanzas-api"
+version = "0.1.0"
+description = "API modular para Finanzas por Voz"
+requires-python = ">=3.12,<3.15"
+dependencies = [
+  "alembic>=1.16,<2",
+  "fastapi>=0.116,<1",
+  "psycopg[binary]>=3.2,<4",
+  "pwdlib[argon2]>=0.3,<1",
+  "pyjwt>=2.10,<3",
+  "pydantic-settings>=2.10,<3",
+  "python-multipart>=0.0.20,<1",
+  "openpyxl>=3.1,<4",
+  "reportlab>=4.4,<5",
+  "sqlalchemy>=2.0,<3",
+  "uvicorn[standard]>=0.35,<1",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx>=0.28,<1",
+  "pytest>=8.4,<9",
+  "ruff>=0.12,<1",
+]
+
+[project.scripts]
+finanzas-reminders = "app.modules.reminders.worker:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]

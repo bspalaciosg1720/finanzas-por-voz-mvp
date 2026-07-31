@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Finanzas por Voz",
+    "slug": "finanzas-por-voz",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "finanzasvoz",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true,
+          "faceIDPermission": "Permite usar Face ID para proteger tu sesión."
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Permite que Finanzas por Voz use el micrófono únicamente mientras registras un movimiento.",
+          "enableBackgroundRecording": false,
+          "enableBackgroundPlayback": false
+        }
+      ],
+      "expo-notifications"
+    ],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.institutoi3.finanzasvoz"
+    },
+    "android": {
+      "package": "com.institutoi3.finanzasvoz"
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
