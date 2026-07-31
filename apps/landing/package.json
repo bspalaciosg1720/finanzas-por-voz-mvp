@@ -2,26 +2,34 @@
   "name": "@finanzas/landing",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "vinext dev",
     "build": "vinext build",
-    "start": "vinext start"
+    "start": "vinext start",
+    "dev:vinext": "vinext dev --port 3001",
+    "build:vinext": "vinext build",
+    "start:vinext": "wrangler dev --config dist/server/wrangler.json",
+    "deploy:vinext": "vinext-cloudflare deploy --config dist/server/wrangler.json"
   },
   "dependencies": {
+    "@vinext/cloudflare": "^1.0.0-beta.4",
     "next": "^16.2.12",
     "react": "^19.2.6",
     "react-dom": "^19.2.6"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^6.0.0",
-    "@vitejs/plugin-rsc": "^0.5.26",
+    "@cloudflare/vite-plugin": "^1.13.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-rsc": "^0.5.26",
     "react-server-dom-webpack": "^19.2.6",
     "typescript": "^5.9.0",
+    "vinext": "^1.0.0-beta.4",
     "vite": "^8.2.0",
-    "vinext": "^1.0.0-beta.4"
+    "wrangler": "^4.116.0"
   },
   "overrides": {
     "postcss": "^8.5.18",
