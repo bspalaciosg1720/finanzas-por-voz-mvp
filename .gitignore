@@ -12,6 +12,8 @@ htmlcov/
 node_modules/
 .expo/
 .next/
+.vinext/
+*.tsbuildinfo
 dist/
 web-build/
 npm-debug.log*
