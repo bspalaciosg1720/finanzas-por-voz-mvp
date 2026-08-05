@@ -16,6 +16,7 @@ import * as Notifications from "expo-notifications";
 import { colors, radius, spacing, typography } from "@/design-system/tokens";
 import { useAuth } from "@/features/auth/AuthContext";
 import { ApiError } from "@/services/api";
+import type { TransactionInbox } from "@/features/transactions/types";
 
 type PushDevice = {
   id: string;
@@ -41,6 +42,8 @@ export default function ProfileScreen() {
   const [reminders, setReminders] = useState<ReminderPreferences | null>(null);
   const [reminderBusy, setReminderBusy] = useState(false);
   const [reminderMessage, setReminderMessage] = useState<string | null>(null);
+  const [transactionInbox, setTransactionInbox] =
+    useState<TransactionInbox | null>(null);
 
   const loadDevices = useCallback(async () => {
     try {
@@ -55,6 +58,11 @@ export default function ProfileScreen() {
     void authenticatedRequest<ReminderPreferences>("/reminders/preferences")
       .then(setReminders)
       .catch(() => setReminderMessage("No pudimos cargar tus recordatorios."));
+    void authenticatedRequest<TransactionInbox>(
+      "/transaction-suggestions/inbox",
+    )
+      .then(setTransactionInbox)
+      .catch(() => setTransactionInbox(null));
   }, [authenticatedRequest, loadDevices]);
 
   async function setReminder(
@@ -179,6 +187,20 @@ export default function ProfileScreen() {
           <Text style={styles.email}>{user?.email}</Text>
         </View>
         <View style={styles.card}>
+          <Text style={styles.settingTitle}>Movimientos desde tu correo</Text>
+          <Text style={styles.settingDescription}>
+            Reenvía a esta dirección los avisos de compras, transferencias o
+            consignaciones que llegan desde tu entidad financiera.
+          </Text>
+          <Text selectable style={styles.inboxAddress}>
+            {transactionInbox?.address ?? "Preparando tu dirección…"}
+          </Text>
+          <Text style={styles.message}>
+            Solo extraemos los datos del movimiento. Siempre podrás confirmarlo
+            o descartarlo antes de registrarlo.
+          </Text>
+        </View>
+        <View style={styles.card}>
           <Text style={styles.settingTitle}>Recordatorios financieros</Text>
           <Text style={styles.settingDescription}>
             Se evalúan a las {reminders?.local_hour ?? 20}:00 en tu zona horaria.
@@ -287,6 +309,15 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.muted,
     marginTop: spacing.sm,
+  },
+  inboxAddress: {
+    ...typography.body,
+    backgroundColor: colors.background,
+    borderRadius: radius.sm,
+    color: colors.primary,
+    fontWeight: "700",
+    marginTop: spacing.md,
+    padding: spacing.md,
   },
   message: {
     ...typography.caption,
