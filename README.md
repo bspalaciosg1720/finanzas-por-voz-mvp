@@ -48,6 +48,7 @@ dispositivos físicos, CI remoto, revisión legal y pruebas con usuarios. Consul
 - [Observabilidad](docs/architecture/observability.md)
 - [Backup y restauración](docs/operations/backup-restore.md)
 - [Recuperación de cuenta](docs/architecture/account-recovery.md)
+- [Sugerencias de movimientos desde correo](docs/architecture/email-transaction-suggestions.md)
 
 ## Aplicaciones
 
@@ -62,5 +63,7 @@ La primera versión validará tres trabajos:
 2. Entender el estado financiero del mes.
 3. Detectar el avance de un presupuesto por categoría.
 
-Las integraciones bancarias, el OCR, las recomendaciones mediante IA, los
-presupuestos compartidos y el modo empresarial quedan fuera del MVP.
+La conexión bancaria directa, el OCR, las recomendaciones mediante IA, los
+presupuestos compartidos y el modo empresarial quedan fuera del MVP. Como
+alternativa de bajo riesgo, el MVP permite convertir alertas financieras
+reenviadas por correo en sugerencias que siempre requieren confirmación.

@@ -38,3 +38,22 @@ export type CreateTransactionInput = {
   occurred_at: string;
   source: "manual";
 };
+
+export type TransactionSuggestion = {
+  id: string;
+  transaction_id: string | null;
+  sender_domain: string;
+  type: TransactionType;
+  amount_minor: number;
+  currency: string;
+  description: string;
+  occurred_at: string;
+  confidence: number;
+  status: "pending" | "confirmed" | "discarded";
+  created_at: string;
+  resolved_at: string | null;
+};
+
+export type TransactionInbox = {
+  address: string;
+};

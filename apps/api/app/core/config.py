@@ -30,6 +30,11 @@ class Settings(BaseSettings):
     smtp_username: str | None = None
     smtp_password: str | None = None
     smtp_use_tls: bool = True
+    inbound_email_domain: str = "inbound.finanzas.local"
+    inbound_email_secret: str = Field(
+        default="development-inbound-email-secret-change-me",
+        min_length=32,
+    )
 
     @model_validator(mode="after")
     def validate_deployed_environment(self) -> "Settings":
@@ -45,6 +50,8 @@ class Settings(BaseSettings):
             raise ValueError("Deployed environments require SMTP email delivery")
         if self.public_app_url.host in {"localhost", "127.0.0.1"}:
             raise ValueError("Deployed environments require a public application URL")
+        if "change-me" in self.inbound_email_secret:
+            raise ValueError("Deployed environments require an inbound email secret")
         return self
 
 

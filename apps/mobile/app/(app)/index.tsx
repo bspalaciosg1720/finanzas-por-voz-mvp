@@ -17,6 +17,7 @@ import {
   formatMoney,
   formatMovementDate,
 } from "@/features/transactions/format";
+import type { TransactionSuggestion } from "@/features/transactions/types";
 import { ApiError } from "@/services/api";
 import { VoiceCaptureModal } from "@/features/voice/VoiceCaptureModal";
 
@@ -27,15 +28,22 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [voiceOpen, setVoiceOpen] = useState(false);
+  const [suggestions, setSuggestions] = useState<TransactionSuggestion[]>([]);
+  const [suggestionBusy, setSuggestionBusy] = useState<string | null>(null);
 
   const load = useCallback(
     async (refresh = false) => {
       refresh ? setRefreshing(true) : setLoading(true);
       setError(null);
       try {
-        setSummary(
-          await authenticatedRequest<DashboardSummary>("/dashboard/summary"),
-        );
+        const [nextSummary, nextSuggestions] = await Promise.all([
+          authenticatedRequest<DashboardSummary>("/dashboard/summary"),
+          authenticatedRequest<TransactionSuggestion[]>(
+            "/transaction-suggestions",
+          ),
+        ]);
+        setSummary(nextSummary);
+        setSuggestions(nextSuggestions);
       } catch (reason) {
         setError(
           reason instanceof ApiError
@@ -53,6 +61,39 @@ export default function HomeScreen() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function resolveSuggestion(
+    suggestion: TransactionSuggestion,
+    action: "confirm" | "discard",
+  ) {
+    setSuggestionBusy(suggestion.id);
+    setError(null);
+    try {
+      await authenticatedRequest(
+        `/transaction-suggestions/${suggestion.id}/${action}`,
+        {
+          method: "POST",
+          body: action === "confirm" ? JSON.stringify({}) : undefined,
+        },
+      );
+      setSuggestions((current) =>
+        current.filter((item) => item.id !== suggestion.id),
+      );
+      if (action === "confirm") {
+        setSummary(
+          await authenticatedRequest<DashboardSummary>("/dashboard/summary"),
+        );
+      }
+    } catch (reason) {
+      setError(
+        reason instanceof ApiError
+          ? reason.message
+          : "No pudimos procesar este movimiento.",
+      );
+    } finally {
+      setSuggestionBusy(null);
+    }
+  }
 
   const today = useMemo(
     () =>
@@ -130,6 +171,69 @@ export default function HomeScreen() {
           </Text>
           <Text style={styles.balanceMeta}>{comparison}</Text>
         </View>
+
+        {suggestions.length ? (
+          <View style={styles.suggestionSection}>
+            <Text style={styles.sectionTitle}>Movimientos detectados</Text>
+            <Text style={styles.mutedLeft}>
+              Confirma los avisos que recibimos de tus entidades financieras.
+            </Text>
+            {suggestions.map((suggestion) => (
+              <View key={suggestion.id} style={styles.suggestionCard}>
+                <Text style={styles.suggestionQuestion}>
+                  ¿Quieres registrar este{" "}
+                  {suggestion.type === "income" ? "ingreso" : "gasto"}?
+                </Text>
+                <View style={styles.suggestionSummary}>
+                  <View style={styles.flex}>
+                    <Text style={styles.recentTitle}>
+                      {suggestion.description || "Movimiento detectado"}
+                    </Text>
+                    <Text style={styles.mutedLeft}>
+                      {suggestion.sender_domain} ·{" "}
+                      {formatMovementDate(suggestion.occurred_at)}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[
+                      styles.suggestionAmount,
+                      suggestion.type === "income" && styles.incomeText,
+                    ]}
+                  >
+                    {formatMoney(
+                      suggestion.amount_minor,
+                      suggestion.currency,
+                    )}
+                  </Text>
+                </View>
+                <View style={styles.suggestionActions}>
+                  <Pressable
+                    disabled={suggestionBusy === suggestion.id}
+                    onPress={() =>
+                      void resolveSuggestion(suggestion, "discard")
+                    }
+                    style={styles.discardButton}
+                  >
+                    <Text style={styles.discardText}>Descartar</Text>
+                  </Pressable>
+                  <Pressable
+                    disabled={suggestionBusy === suggestion.id}
+                    onPress={() =>
+                      void resolveSuggestion(suggestion, "confirm")
+                    }
+                    style={styles.confirmButton}
+                  >
+                    {suggestionBusy === suggestion.id ? (
+                      <ActivityIndicator color={colors.surface} />
+                    ) : (
+                      <Text style={styles.confirmText}>Registrar</Text>
+                    )}
+                  </Pressable>
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : null}
 
         <View style={styles.summary}>
           <MetricCard
@@ -324,6 +428,54 @@ const styles = StyleSheet.create({
     marginVertical: spacing.sm,
   },
   balanceMeta: { ...typography.caption, color: colors.surface },
+  suggestionSection: { marginTop: spacing.lg },
+  suggestionCard: {
+    backgroundColor: colors.surface,
+    borderColor: colors.primary,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    marginTop: spacing.sm,
+    padding: spacing.md,
+  },
+  suggestionQuestion: {
+    ...typography.body,
+    color: colors.ink,
+    fontWeight: "700",
+  },
+  suggestionSummary: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  suggestionAmount: {
+    ...typography.cardValue,
+    color: colors.danger,
+  },
+  suggestionActions: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  discardButton: {
+    alignItems: "center",
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 44,
+  },
+  discardText: { ...typography.button, color: colors.muted },
+  confirmButton: {
+    alignItems: "center",
+    backgroundColor: colors.primary,
+    borderRadius: radius.sm,
+    flex: 1,
+    justifyContent: "center",
+    minHeight: 44,
+  },
+  confirmText: { ...typography.button, color: colors.surface },
   summary: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.sm },
   summaryCard: {
     backgroundColor: colors.surface,

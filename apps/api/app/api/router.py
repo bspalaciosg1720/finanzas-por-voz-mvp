@@ -10,6 +10,7 @@ from app.modules.notifications.router import router as notifications_router
 from app.modules.reminders.router import router as reminders_router
 from app.modules.reports.router import router as reports_router
 from app.modules.savings.router import router as savings_router
+from app.modules.transaction_suggestions.router import router as suggestions_router
 from app.modules.transactions.router import router as transactions_router
 from app.modules.voice.router import router as voice_router
 
@@ -24,5 +25,6 @@ api_router.include_router(budgets_router)
 api_router.include_router(profile_router)
 api_router.include_router(categories_router)
 api_router.include_router(transactions_router)
+api_router.include_router(suggestions_router)
 api_router.include_router(dashboard_router)
 api_router.include_router(voice_router)
