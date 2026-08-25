@@ -70,6 +70,10 @@ def create_transaction(
         try_evaluate_budget_alert(db, user, existing)
         return existing
     try_evaluate_budget_alert(db, user, transaction)
+    if transaction.type == "income":
+        from app.modules.financial_strategies.pay_first import apply_pay_first
+
+        apply_pay_first(db, user, transaction)
     return transaction
 
 
@@ -99,6 +103,8 @@ def update_transaction(
     payload: TransactionUpdate,
 ) -> Transaction:
     transaction = get_transaction(db, user, transaction_id)
+    ensure_regular_transaction(transaction)
+    ensure_no_automatic_savings(db, user, transaction)
     values = payload.model_dump(exclude_unset=True)
     if "category_id" in values:
         validate_category(db, user, values["category_id"])
@@ -111,6 +117,8 @@ def update_transaction(
 
 def delete_transaction(db: Session, user: User, transaction_id: uuid.UUID) -> None:
     transaction = get_transaction(db, user, transaction_id)
+    ensure_regular_transaction(transaction)
+    ensure_no_automatic_savings(db, user, transaction)
     transaction.deleted_at = utc_now()
     transaction.status = "deleted"
     db.commit()
@@ -144,6 +152,27 @@ def try_evaluate_budget_alert(
         )
     except SQLAlchemyError:
         db.rollback()
+
+
+def ensure_no_automatic_savings(db: Session, user: User, transaction: Transaction) -> None:
+    from app.modules.savings.models import SavingsContribution
+
+    contribution = db.scalar(
+        select(SavingsContribution).where(
+            SavingsContribution.source_income_transaction_id == transaction.id,
+            SavingsContribution.user_id == user.id,
+        )
+    )
+    if contribution is not None:
+        raise AppError(
+            status=409,
+            title="Income has an automatic savings contribution",
+            detail=(
+                "Delete the linked Pay yourself first contribution before editing "
+                "or deleting this income."
+            ),
+            error_type="income-has-automatic-savings",
+        )
 
 
 def list_transactions(
@@ -227,6 +256,16 @@ def ensure_matching_fingerprint(transaction: Transaction, fingerprint: str) -> N
             title="Idempotency conflict",
             detail="This idempotency key was already used with different data.",
             error_type="idempotency-conflict",
+        )
+
+
+def ensure_regular_transaction(transaction: Transaction) -> None:
+    if transaction.financial_role != "regular":
+        raise AppError(
+            status=409,
+            title="Linked movement",
+            detail="Edit or remove this movement from the module that created it.",
+            error_type="linked-transaction",
         )
 
 

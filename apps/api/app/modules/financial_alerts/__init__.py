@@ -1,0 +1,1 @@
+"""Prioritized deterministic financial alerts."""

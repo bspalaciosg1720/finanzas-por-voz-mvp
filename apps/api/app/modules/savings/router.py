@@ -9,6 +9,7 @@ from app.modules.auth.dependencies import CurrentUser
 from app.modules.savings.schemas import (
     SavingsContributionCreate,
     SavingsContributionResponse,
+    SavingsContributionUpdate,
     SavingsGoalCreate,
     SavingsGoalResponse,
     SavingsGoalUpdate,
@@ -19,6 +20,7 @@ from app.modules.savings.service import (
     create_goal,
     delete_contribution,
     list_goals,
+    update_contribution,
     update_goal,
 )
 
@@ -84,3 +86,17 @@ def remove_contribution(
 ) -> Response:
     delete_contribution(db, user, goal_id, contribution_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.patch(
+    "/{goal_id}/contributions/{contribution_id}",
+    response_model=SavingsContributionResponse,
+)
+def edit_contribution(
+    goal_id: uuid.UUID,
+    contribution_id: uuid.UUID,
+    payload: SavingsContributionUpdate,
+    user: CurrentUser,
+    db: DbSession,
+):
+    return update_contribution(db, user, goal_id, contribution_id, payload)

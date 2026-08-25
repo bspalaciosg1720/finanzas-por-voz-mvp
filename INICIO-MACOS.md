@@ -29,7 +29,7 @@ y no los subas al repositorio.
 docker compose up -d
 cd apps/api
 uv run alembic upgrade head
-uv run uvicorn app.main:app --reload
+uv run uvicorn app.main:app --reload --host 0.0.0.0
 ```
 
 La documentación de la API estará en `http://localhost:8000/docs`.
@@ -42,6 +42,8 @@ En otra terminal, desde la raíz:
 npm run mobile:start
 ```
 
+Instala **Expo Go** en el iPhone y escanea el código QR mostrado por Expo.
+
 Para un iPhone físico, `EXPO_PUBLIC_API_URL` debe usar la IP local del Mac, no
 `localhost`, por ejemplo:
 
@@ -52,6 +54,10 @@ EXPO_PUBLIC_API_URL=http://192.168.1.20:8000/api/v1
 El iPhone y el Mac deben estar en la misma red y el firewall debe permitir la
 conexión.
 
+La sección **Salud** funciona sin proveedor de voz: usa los movimientos
+manuales, presupuestos y aportes de ahorro ya registrados. Para obtener una
+puntuación, registra al menos un ingreso del mes y clasifica los gastos.
+
 ## Verificación inicial
 
 ```bash
@@ -61,7 +67,7 @@ npm run mobile:typecheck
 npx expo-doctor
 ```
 
-La línea base al crear este paquete era de 217 pruebas backend aprobadas,
+La línea base actual es de 232 pruebas backend aprobadas,
 TypeScript limpio y Expo Doctor 21/21.
 
 ## Funciones que requieren credenciales externas

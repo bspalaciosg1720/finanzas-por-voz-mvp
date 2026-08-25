@@ -254,3 +254,15 @@ def reset_password(db: Session, secret: str, new_password: str) -> None:
         .values(revoked_at=now)
     )
     db.commit()
+
+
+def delete_account(db: Session, user: User, password: str) -> None:
+    if user.password_hash is None or not verify_password(password, user.password_hash):
+        raise AppError(
+            status=401,
+            title="Invalid credentials",
+            detail="Password is incorrect.",
+            error_type="invalid-credentials",
+        )
+    db.delete(user)
+    db.commit()

@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
+  Modal,
   Platform,
   Pressable,
   SafeAreaView,
@@ -8,6 +10,7 @@ import {
   StyleSheet,
   Switch,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import Constants from "expo-constants";
@@ -35,7 +38,7 @@ type ReminderPreferences = {
 };
 
 export default function ProfileScreen() {
-  const { authenticatedRequest, logout, user } = useAuth();
+  const { authenticatedRequest, deleteAccount, logout, user } = useAuth();
   const [devices, setDevices] = useState<PushDevice[]>([]);
   const [pushBusy, setPushBusy] = useState(false);
   const [pushMessage, setPushMessage] = useState<string | null>(null);
@@ -44,6 +47,10 @@ export default function ProfileScreen() {
   const [reminderMessage, setReminderMessage] = useState<string | null>(null);
   const [transactionInbox, setTransactionInbox] =
     useState<TransactionInbox | null>(null);
+  const [deleteVisible, setDeleteVisible] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteMessage, setDeleteMessage] = useState<string | null>(null);
 
   const loadDevices = useCallback(async () => {
     try {
@@ -176,6 +183,40 @@ export default function ProfileScreen() {
       setPushBusy(false);
     }
   }
+
+  async function confirmAccountDeletion() {
+    if (!deletePassword) {
+      setDeleteMessage("Escribe tu contraseña para confirmar.");
+      return;
+    }
+    setDeleteBusy(true);
+    setDeleteMessage(null);
+    try {
+      await deleteAccount(deletePassword);
+      setDeleteVisible(false);
+      setDeletePassword("");
+    } catch (reason) {
+      setDeleteMessage(
+        reason instanceof ApiError
+          ? reason.message
+          : "No pudimos eliminar la cuenta.",
+      );
+    } finally {
+      setDeleteBusy(false);
+    }
+  }
+
+  function requestAccountDeletion() {
+    Alert.alert(
+      "¿Eliminar tu cuenta?",
+      "Se borrarán permanentemente tu perfil y todos tus datos financieros.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Continuar", style: "destructive", onPress: () => setDeleteVisible(true) },
+      ],
+    );
+  }
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -260,7 +301,70 @@ export default function ProfileScreen() {
         <Pressable accessibilityRole="button" onPress={logout} style={styles.logout}>
           <Text style={styles.logoutText}>Cerrar sesión</Text>
         </Pressable>
+        <Pressable
+          accessibilityHint="Elimina permanentemente tu cuenta y datos financieros"
+          accessibilityRole="button"
+          onPress={requestAccountDeletion}
+          style={styles.deleteAction}
+        >
+          <Text style={styles.deleteActionText}>Eliminar mi cuenta</Text>
+        </Pressable>
       </ScrollView>
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setDeleteVisible(false)}
+        transparent
+        visible={deleteVisible}
+      >
+        <View style={styles.modalBackdrop}>
+          <View accessibilityViewIsModal style={styles.modalCard}>
+            <Text accessibilityRole="header" style={styles.settingTitle}>
+              Confirmar eliminación
+            </Text>
+            <Text style={styles.settingDescription}>
+              Esta acción es permanente. Se eliminarán movimientos, presupuestos,
+              deudas, metas y configuraciones. Escribe tu contraseña para continuar.
+            </Text>
+            <TextInput
+              accessibilityLabel="Contraseña para eliminar la cuenta"
+              autoCapitalize="none"
+              autoComplete="current-password"
+              onChangeText={setDeletePassword}
+              placeholder="Contraseña"
+              secureTextEntry
+              style={styles.passwordInput}
+              value={deletePassword}
+            />
+            {deleteMessage ? <Text style={styles.deleteError}>{deleteMessage}</Text> : null}
+            <View style={styles.modalActions}>
+              <Pressable
+                accessibilityRole="button"
+                disabled={deleteBusy}
+                onPress={() => {
+                  setDeleteVisible(false);
+                  setDeletePassword("");
+                  setDeleteMessage(null);
+                }}
+                style={styles.cancelAction}
+              >
+                <Text style={styles.cancelActionText}>Cancelar</Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                disabled={deleteBusy}
+                onPress={() => void confirmAccountDeletion()}
+                style={styles.confirmDeleteAction}
+              >
+                {deleteBusy ? (
+                  <ActivityIndicator color={colors.surface} />
+                ) : (
+                  <Text style={styles.confirmDeleteText}>Eliminar definitivamente</Text>
+                )}
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -353,4 +457,41 @@ const styles = StyleSheet.create({
     minHeight: 52,
   },
   logoutText: { ...typography.button, color: colors.danger },
+  deleteAction: { alignItems: "center", marginTop: spacing.lg, padding: spacing.md },
+  deleteActionText: { ...typography.body, color: colors.danger, textDecorationLine: "underline" },
+  modalBackdrop: {
+    alignItems: "center",
+    backgroundColor: "rgba(15, 23, 42, 0.55)",
+    flex: 1,
+    justifyContent: "center",
+    padding: spacing.lg,
+  },
+  modalCard: {
+    backgroundColor: colors.surface,
+    borderRadius: radius.md,
+    padding: spacing.xl,
+    width: "100%",
+  },
+  passwordInput: {
+    ...typography.body,
+    borderColor: colors.border,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    color: colors.ink,
+    marginTop: spacing.lg,
+    minHeight: 50,
+    paddingHorizontal: spacing.md,
+  },
+  deleteError: { ...typography.caption, color: colors.danger, marginTop: spacing.sm },
+  modalActions: { gap: spacing.sm, marginTop: spacing.lg },
+  cancelAction: { alignItems: "center", minHeight: 46, justifyContent: "center" },
+  cancelActionText: { ...typography.button, color: colors.ink },
+  confirmDeleteAction: {
+    alignItems: "center",
+    backgroundColor: colors.danger,
+    borderRadius: radius.sm,
+    justifyContent: "center",
+    minHeight: 50,
+  },
+  confirmDeleteText: { ...typography.button, color: colors.surface },
 });

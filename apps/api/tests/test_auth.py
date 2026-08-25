@@ -1,4 +1,5 @@
 from app.modules.auth.models import RefreshSession
+from app.modules.users.models import User
 from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
@@ -51,6 +52,21 @@ def test_login_rejects_wrong_password(client: TestClient) -> None:
         },
     )
     assert response.status_code == 401
+
+
+def test_login_is_blocked_after_repeated_failures(client: TestClient) -> None:
+    assert register(client).status_code == 201
+    payload = {
+        "email": "ana@example.com",
+        "password": "incorrect-password",
+        "device_name": "Test phone",
+    }
+    for _ in range(5):
+        assert client.post("/api/v1/auth/login", json=payload).status_code == 401
+
+    blocked = client.post("/api/v1/auth/login", json=payload)
+    assert blocked.status_code == 429
+    assert blocked.json()["type"].endswith("/too-many-login-attempts")
 
 
 def test_refresh_rotates_and_rejects_reuse(client: TestClient) -> None:
@@ -145,3 +161,33 @@ def test_user_cannot_revoke_another_users_session(client: TestClient) -> None:
         json={"refresh_token": second["tokens"]["refresh_token"]},
     )
     assert still_valid.status_code == 200
+
+
+def test_account_deletion_requires_password_and_removes_user(
+    client: TestClient,
+    db_factory: sessionmaker[Session],
+) -> None:
+    auth = register(client).json()
+    headers = {"Authorization": f"Bearer {auth['tokens']['access_token']}"}
+
+    rejected = client.request(
+        "DELETE",
+        "/api/v1/me",
+        headers=headers,
+        json={"password": "wrong-password", "confirmation": "ELIMINAR"},
+    )
+    assert rejected.status_code == 401
+
+    deleted = client.request(
+        "DELETE",
+        "/api/v1/me",
+        headers=headers,
+        json={
+            "password": REGISTER_PAYLOAD["password"],
+            "confirmation": "ELIMINAR",
+        },
+    )
+    assert deleted.status_code == 204
+    assert client.get("/api/v1/me", headers=headers).status_code == 401
+    with db_factory() as db:
+        assert db.scalar(select(User).where(User.email == REGISTER_PAYLOAD["email"])) is None

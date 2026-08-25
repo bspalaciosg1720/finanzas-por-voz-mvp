@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.modules.categories.models import Category
 from app.modules.dashboard.schemas import DashboardSummary, TopExpenseCategory
+from app.modules.transactions.accounting import CONSUMPTION_ROLES, EARNED_INCOME_ROLES
 from app.modules.transactions.models import Transaction
 from app.modules.transactions.schemas import TransactionResponse
 from app.modules.users.models import User
@@ -34,11 +35,29 @@ def _totals(
 ) -> tuple[int, int]:
     statement = select(
         func.coalesce(
-            func.sum(case((Transaction.type == "income", Transaction.amount_minor), else_=0)),
+            func.sum(
+                case(
+                    (
+                        (Transaction.type == "income")
+                        & Transaction.financial_role.in_(EARNED_INCOME_ROLES),
+                        Transaction.amount_minor,
+                    ),
+                    else_=0,
+                )
+            ),
             0,
         ),
         func.coalesce(
-            func.sum(case((Transaction.type == "expense", Transaction.amount_minor), else_=0)),
+            func.sum(
+                case(
+                    (
+                        (Transaction.type == "expense")
+                        & Transaction.financial_role.in_(CONSUMPTION_ROLES),
+                        Transaction.amount_minor,
+                    ),
+                    else_=0,
+                )
+            ),
             0,
         ),
     ).where(
@@ -53,6 +72,26 @@ def _totals(
         statement = statement.where(Transaction.occurred_at < end)
     income, expense = db.execute(statement).one()
     return int(income), int(expense)
+
+
+def _cash_balance(db: Session, user: User) -> int:
+    income, expense = db.execute(
+        select(
+            func.coalesce(
+                func.sum(case((Transaction.type == "income", Transaction.amount_minor), else_=0)), 0
+            ),
+            func.coalesce(
+                func.sum(case((Transaction.type == "expense", Transaction.amount_minor), else_=0)),
+                0,
+            ),
+        ).where(
+            Transaction.user_id == user.id,
+            Transaction.currency == user.default_currency,
+            Transaction.deleted_at.is_(None),
+            Transaction.status == "confirmed",
+        )
+    ).one()
+    return int(income) - int(expense)
 
 
 def get_dashboard_summary(
@@ -71,7 +110,6 @@ def get_dashboard_summary(
         user.timezone,
     )
 
-    total_income, total_expense = _totals(db, user)
     income, expense = _totals(db, user, start, end)
     previous_income, previous_expense = _totals(db, user, previous_start, previous_end)
 
@@ -86,6 +124,7 @@ def get_dashboard_summary(
             Transaction.user_id == user.id,
             Transaction.currency == user.default_currency,
             Transaction.type == "expense",
+            Transaction.financial_role.in_(CONSUMPTION_ROLES),
             Transaction.status == "confirmed",
             Transaction.deleted_at.is_(None),
             Transaction.occurred_at >= start,
@@ -127,7 +166,7 @@ def get_dashboard_summary(
     return DashboardSummary(
         currency=user.default_currency,
         period=f"{year:04d}-{month:02d}",
-        balance_minor=total_income - total_expense,
+        balance_minor=_cash_balance(db, user),
         income_minor=income,
         expense_minor=expense,
         previous_income_minor=previous_income,

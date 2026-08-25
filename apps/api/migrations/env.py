@@ -6,6 +6,12 @@ from app.infrastructure.database import Base
 from app.modules.auth import models as auth_models
 from app.modules.budgets import models as budget_models
 from app.modules.categories import models as category_models
+from app.modules.debts import models as debt_models
+from app.modules.emergency_fund import models as emergency_fund_models
+from app.modules.financial_alerts import models as financial_alert_models
+from app.modules.financial_calendar import models as financial_calendar_models
+from app.modules.financial_health import models as financial_health_models
+from app.modules.financial_strategies import models as financial_strategy_models
 from app.modules.notifications import models as notification_models
 from app.modules.reminders import models as reminder_models
 from app.modules.savings import models as savings_models
@@ -18,6 +24,12 @@ _loaded_models = (
     auth_models,
     budget_models,
     category_models,
+    debt_models,
+    emergency_fund_models,
+    financial_alert_models,
+    financial_calendar_models,
+    financial_health_models,
+    financial_strategy_models,
     notification_models,
     reminder_models,
     savings_models,

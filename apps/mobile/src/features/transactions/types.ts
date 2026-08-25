@@ -9,6 +9,7 @@ export type Transaction = {
   description: string;
   occurred_at: string;
   source: "manual" | "voice" | "import" | "integration";
+  financial_role: "regular" | "debt_payment" | "savings_transfer" | "obligation_payment";
   status: string;
   deleted_at: string | null;
   created_at: string;

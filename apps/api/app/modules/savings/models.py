@@ -18,9 +18,11 @@ class SavingsGoal(Base):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(80))
+    goal_type: Mapped[str] = mapped_column(String(24), default="general")
     target_amount_minor: Mapped[int] = mapped_column(BigInteger)
     currency: Mapped[str] = mapped_column(String(3))
     target_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    planned_monthly_minor: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
     status: Mapped[str] = mapped_column(String(16), default="active")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
     updated_at: Mapped[datetime] = mapped_column(
@@ -43,6 +45,12 @@ class SavingsContribution(Base):
         Uuid,
         ForeignKey("users.id", ondelete="CASCADE"),
         index=True,
+    )
+    transaction_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("transactions.id", ondelete="SET NULL"), unique=True, nullable=True
+    )
+    source_income_transaction_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid, ForeignKey("transactions.id", ondelete="SET NULL"), unique=True, nullable=True
     )
     amount_minor: Mapped[int] = mapped_column(BigInteger)
     contributed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

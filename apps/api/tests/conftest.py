@@ -1,9 +1,11 @@
 from collections.abc import Generator
 
 import pytest
+from app.core.config import get_settings
 from app.infrastructure.database import Base, get_db
 from app.infrastructure.email import EmailMessage, EmailSender, get_email_sender
 from app.main import create_app
+from app.modules.transaction_suggestions.router import require_inbound_email_enabled
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
@@ -34,6 +36,9 @@ def client(
     db_factory: sessionmaker[Session],
     mailbox: list[EmailMessage],
 ) -> Generator[TestClient]:
+    settings = get_settings()
+    original_inbound_secret = settings.inbound_email_secret
+    settings.inbound_email_secret = "development-inbound-email-secret-change-me"
     application = create_app()
 
     def override_db() -> Generator[Session]:
@@ -51,5 +56,7 @@ def client(
 
     application.dependency_overrides[get_db] = override_db
     application.dependency_overrides[get_email_sender] = override_email_sender
+    application.dependency_overrides[require_inbound_email_enabled] = lambda: None
     with TestClient(application) as test_client:
         yield test_client
+    settings.inbound_email_secret = original_inbound_secret

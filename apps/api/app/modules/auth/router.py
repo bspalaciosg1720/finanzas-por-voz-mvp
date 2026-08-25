@@ -1,15 +1,17 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from sqlalchemy.orm import Session
 
+from app.core.errors import AppError
 from app.infrastructure.database import get_db
 from app.infrastructure.email import EmailSender, get_email_sender
 from app.modules.auth.dependencies import CurrentUser
 from app.modules.auth.schemas import (
     ActionTokenRequest,
     AuthResponse,
+    DeleteAccountRequest,
     ForgotPasswordRequest,
     LoginRequest,
     LogoutRequest,
@@ -21,6 +23,7 @@ from app.modules.auth.schemas import (
     UserResponse,
 )
 from app.modules.auth.service import (
+    delete_account,
     list_user_sessions,
     login,
     register,
@@ -31,6 +34,11 @@ from app.modules.auth.service import (
     revoke_user_session,
     rotate_refresh_token,
     verify_email,
+)
+from app.modules.auth.throttling import (
+    assert_login_allowed,
+    clear_login_failures,
+    record_login_failure,
 )
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -45,8 +53,17 @@ def register_user(payload: RegisterRequest, db: DbSession) -> AuthResponse:
 
 
 @router.post("/login", response_model=AuthResponse)
-def login_user(payload: LoginRequest, db: DbSession) -> AuthResponse:
-    return login(db, payload)
+def login_user(payload: LoginRequest, request: Request, db: DbSession) -> AuthResponse:
+    client_host = request.client.host if request.client else "unknown"
+    assert_login_allowed(db, payload.email, client_host)
+    try:
+        response = login(db, payload)
+    except AppError as exc:
+        if exc.status == 401:
+            record_login_failure(db, payload.email, client_host)
+        raise
+    clear_login_failures(db, payload.email, client_host)
+    return response
 
 
 @router.post("/refresh", response_model=TokenPair)
@@ -106,3 +123,13 @@ def change_password(payload: ResetPasswordRequest, db: DbSession) -> Response:
 @profile_router.get("/me", response_model=UserResponse)
 def get_profile(user: CurrentUser) -> UserResponse:
     return UserResponse.model_validate(user)
+
+
+@profile_router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def remove_account(
+    payload: DeleteAccountRequest,
+    user: CurrentUser,
+    db: DbSession,
+) -> Response:
+    delete_account(db, user, payload.password)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

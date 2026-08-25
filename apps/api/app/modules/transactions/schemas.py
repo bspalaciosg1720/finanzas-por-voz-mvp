@@ -61,6 +61,7 @@ class TransactionResponse(BaseModel):
     description: str
     occurred_at: datetime
     source: str
+    financial_role: str
     status: str
     deleted_at: datetime | None
     created_at: datetime

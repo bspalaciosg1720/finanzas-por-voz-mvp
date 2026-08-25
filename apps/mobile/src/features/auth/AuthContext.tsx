@@ -34,6 +34,7 @@ type AuthContextValue = {
   login(email: string, password: string): Promise<void>;
   register(input: RegisterInput): Promise<void>;
   logout(): Promise<void>;
+  deleteAccount(password: string): Promise<void>;
   authenticatedRequest<T>(path: string, options?: RequestInit): Promise<T>;
 };
 
@@ -129,6 +130,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
     [session],
   );
 
+  const deleteAccount = useCallback(
+    async (password: string) => {
+      await authenticatedRequest<void>("/me", {
+        method: "DELETE",
+        body: JSON.stringify({ password, confirmation: "ELIMINAR" }),
+      });
+      await clearSession();
+      setSession(null);
+    },
+    [authenticatedRequest],
+  );
+
   const value = useMemo(
     () => ({
       user: session?.user ?? null,
@@ -136,9 +149,18 @@ export function AuthProvider({ children }: PropsWithChildren) {
       login,
       register,
       logout,
+      deleteAccount,
       authenticatedRequest,
     }),
-    [authenticatedRequest, isLoading, login, logout, register, session?.user],
+    [
+      authenticatedRequest,
+      deleteAccount,
+      isLoading,
+      login,
+      logout,
+      register,
+      session?.user,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

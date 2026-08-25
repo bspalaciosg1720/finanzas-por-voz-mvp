@@ -27,8 +27,22 @@ router = APIRouter(prefix="/transaction-suggestions", tags=["Transaction suggest
 DbSession = Annotated[Session, Depends(get_db)]
 
 
+def require_inbound_email_enabled() -> None:
+    if not get_settings().inbound_email_enabled:
+        raise AppError(
+            status=404,
+            title="Integration unavailable",
+            detail="Inbound email integration is not enabled.",
+            error_type="integration-unavailable",
+        )
+
+
 @router.get("/inbox", response_model=InboxAddressResponse)
-def inbox(user: CurrentUser, db: DbSession) -> InboxAddressResponse:
+def inbox(
+    user: CurrentUser,
+    db: DbSession,
+    _: Annotated[None, Depends(require_inbound_email_enabled)],
+) -> InboxAddressResponse:
     return InboxAddressResponse(address=get_or_create_inbox(db, user))
 
 
@@ -42,6 +56,7 @@ def inbound_email(
     payload: InboundEmailPayload,
     db: DbSession,
     secret: Annotated[str, Header(alias="X-Inbound-Email-Secret")],
+    _: Annotated[None, Depends(require_inbound_email_enabled)],
 ) -> SuggestionResponse | None:
     if not hmac.compare_digest(secret, get_settings().inbound_email_secret):
         raise AppError(

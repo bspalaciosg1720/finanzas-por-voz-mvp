@@ -21,6 +21,7 @@ from app.modules.reports.schemas import (
     ReportPoint,
     ReportSummary,
 )
+from app.modules.transactions.accounting import CONSUMPTION_ROLES, EARNED_INCOME_ROLES
 from app.modules.transactions.models import Transaction
 from app.modules.users.models import User
 
@@ -42,14 +43,10 @@ def period_bounds(anchor: date, period: ReportPeriod) -> tuple[date, date]:
     return date(anchor.year, 1, 1), date(anchor.year, 12, 31)
 
 
-def _utc_bounds(
-    start_date: date, end_date: date, timezone: str
-) -> tuple[datetime, datetime]:
+def _utc_bounds(start_date: date, end_date: date, timezone: str) -> tuple[datetime, datetime]:
     zone = ZoneInfo(timezone)
     start = datetime.combine(start_date, datetime.min.time(), zone).astimezone(UTC)
-    end = datetime.combine(
-        end_date + timedelta(days=1), datetime.min.time(), zone
-    ).astimezone(UTC)
+    end = datetime.combine(end_date + timedelta(days=1), datetime.min.time(), zone).astimezone(UTC)
     return start, end
 
 
@@ -81,6 +78,10 @@ def _series(
     zone = ZoneInfo(timezone)
     grouped: dict[str, list[int]] = {}
     for item, _ in rows:
+        if item.type == "income" and item.financial_role not in EARNED_INCOME_ROLES:
+            continue
+        if item.type == "expense" and item.financial_role not in CONSUMPTION_ROLES:
+            continue
         occurred_at = item.occurred_at
         if occurred_at.tzinfo is None:
             occurred_at = occurred_at.replace(tzinfo=UTC)
@@ -100,26 +101,36 @@ def _series(
     ]
 
 
-def get_report(
-    db: Session, user: User, *, period: ReportPeriod, anchor: date
-) -> ReportSummary:
+def get_report(db: Session, user: User, *, period: ReportPeriod, anchor: date) -> ReportSummary:
     start_date, end_date = period_bounds(anchor, period)
     rows = _rows(db, user, start_date, end_date)
     days = (end_date - start_date).days + 1
     previous_end = start_date - timedelta(days=1)
     previous_start = previous_end - timedelta(days=days - 1)
     previous_rows = _rows(db, user, previous_start, previous_end)
-    income = sum(item.amount_minor for item, _ in rows if item.type == "income")
-    expense = sum(item.amount_minor for item, _ in rows if item.type == "expense")
+    income = sum(
+        item.amount_minor
+        for item, _ in rows
+        if item.type == "income" and item.financial_role in EARNED_INCOME_ROLES
+    )
+    expense = sum(
+        item.amount_minor
+        for item, _ in rows
+        if item.type == "expense" and item.financial_role in CONSUMPTION_ROLES
+    )
     previous_income = sum(
-        item.amount_minor for item, _ in previous_rows if item.type == "income"
+        item.amount_minor
+        for item, _ in previous_rows
+        if item.type == "income" and item.financial_role in EARNED_INCOME_ROLES
     )
     previous_expense = sum(
-        item.amount_minor for item, _ in previous_rows if item.type == "expense"
+        item.amount_minor
+        for item, _ in previous_rows
+        if item.type == "expense" and item.financial_role in CONSUMPTION_ROLES
     )
     grouped: dict[tuple[str | None, str], int] = {}
     for item, category_name in rows:
-        if item.type != "expense":
+        if item.type != "expense" or item.financial_role not in CONSUMPTION_ROLES:
             continue
         key = (
             str(item.category_id) if item.category_id else None,
@@ -158,16 +169,14 @@ def get_report(
     )
 
 
-def export_csv(
-    db: Session, user: User, *, period: ReportPeriod, anchor: date
-) -> tuple[str, bytes]:
+def export_csv(db: Session, user: User, *, period: ReportPeriod, anchor: date) -> tuple[str, bytes]:
     start_date, end_date = period_bounds(anchor, period)
     rows = _rows(db, user, start_date, end_date)
     zone = ZoneInfo(user.timezone)
     output = io.StringIO(newline="")
     writer = csv.writer(output)
     writer.writerow(
-        ["fecha", "tipo", "monto", "moneda", "categoria", "descripcion", "origen"]
+        ["fecha", "tipo", "rol_financiero", "monto", "moneda", "categoria", "descripcion", "origen"]
     )
     for item, category_name in sorted(rows, key=lambda row: row[0].occurred_at):
         occurred_at = item.occurred_at
@@ -177,6 +186,7 @@ def export_csv(
             [
                 occurred_at.astimezone(zone).isoformat(),
                 item.type,
+                item.financial_role,
                 item.amount_minor,
                 item.currency,
                 category_name or "Sin categoría",
@@ -238,9 +248,7 @@ def export_xlsx(
     return f"movimientos-{period}-{start_date}-{end_date}.xlsx", output.getvalue()
 
 
-def export_pdf(
-    db: Session, user: User, *, period: ReportPeriod, anchor: date
-) -> tuple[str, bytes]:
+def export_pdf(db: Session, user: User, *, period: ReportPeriod, anchor: date) -> tuple[str, bytes]:
     start_date, end_date, rows = _export_rows(db, user, period, anchor)
     summary = get_report(db, user, period=period, anchor=anchor)
     output = io.BytesIO()
