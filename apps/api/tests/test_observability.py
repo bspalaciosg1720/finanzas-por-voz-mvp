@@ -71,3 +71,13 @@ def test_json_formatter_includes_request_id() -> None:
 def test_staging_rejects_development_secrets() -> None:
     with pytest.raises(ValueError):
         Settings(app_env="staging")
+
+
+def test_render_postgres_url_selects_installed_psycopg_driver() -> None:
+    settings = Settings(
+        _env_file=None,
+        database_url="postgresql://app:secret@private-db:5432/finanzas",
+    )
+    assert settings.database_url == (
+        "postgresql+psycopg://app:secret@private-db:5432/finanzas"
+    )

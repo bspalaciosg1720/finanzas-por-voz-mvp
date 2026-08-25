@@ -52,6 +52,18 @@ verificación, recuperación y política de privacidad.
 7. Configurar en EAS `EXPO_PUBLIC_API_URL=https://api.example/api/v1`.
 8. Generar primero un build iOS `preview`; solo después crear el de producción.
 
+## Crear los recursos con Render Blueprint
+
+El repositorio incluye `render.yaml`, que declara la API y PostgreSQL en la misma región,
+bloquea el acceso público directo a la base, genera los secretos internos y ejecuta las
+migraciones como tarea previa al despliegue.
+
+En Render selecciona **New → Blueprint**, conecta este repositorio y revisa el costo antes
+de confirmar. Render solicitará `EMAIL_FROM`, `SMTP_HOST`, `SMTP_USERNAME` y
+`SMTP_PASSWORD`; introdúcelos únicamente en su formulario de secretos. El plan declarado
+usa una instancia `starter` para la API y `basic-256mb` para PostgreSQL porque los planes
+gratuitos no ofrecen la persistencia adecuada para datos financieros.
+
 No se deben ejecutar migraciones desde cada réplica al arrancar. El hosting debe usar
 una única tarea previa para evitar carreras entre instancias.
 
