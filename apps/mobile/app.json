@@ -23,7 +23,8 @@
           "enableBackgroundPlayback": false
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-status-bar"
     ],
     "ios": {
       "supportsTablet": false,
