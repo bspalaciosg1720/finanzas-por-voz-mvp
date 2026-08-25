@@ -40,6 +40,7 @@ class Transaction(Base):
     description: Mapped[str] = mapped_column(String(240), default="")
     occurred_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     source: Mapped[str] = mapped_column(String(16), default="manual")
+    financial_role: Mapped[str] = mapped_column(String(24), default="regular")
     status: Mapped[str] = mapped_column(String(16), default="confirmed")
     idempotency_key: Mapped[uuid.UUID] = mapped_column(Uuid)
     idempotency_fingerprint: Mapped[str] = mapped_column(String(64))

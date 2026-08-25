@@ -7,6 +7,7 @@ import { useAuth } from "@/features/auth/AuthContext";
 const icons: Record<string, string> = {
   index: "⌂",
   movements: "≡",
+  health: "♥",
   budget: "◎",
   reports: "▥",
   profile: "○",
@@ -29,10 +30,12 @@ export default function AppLayout() {
     >
       <Tabs.Screen name="index" options={{ title: "Inicio" }} />
       <Tabs.Screen name="movements" options={{ title: "Movimientos" }} />
+      <Tabs.Screen name="health" options={{ title: "Salud" }} />
+      <Tabs.Screen name="debts" options={{ title: "Deudas", href: null }} />
+      <Tabs.Screen name="planning" options={{ title: "Planificación", href: null }} />
       <Tabs.Screen name="budget" options={{ title: "Presupuesto" }} />
-      <Tabs.Screen name="reports" options={{ title: "Reportes" }} />
+      <Tabs.Screen name="reports" options={{ title: "Reportes", href: null }} />
       <Tabs.Screen name="profile" options={{ title: "Perfil" }} />
     </Tabs>
   );
 }
-

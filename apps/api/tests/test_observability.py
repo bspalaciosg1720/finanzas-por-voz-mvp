@@ -16,6 +16,9 @@ def test_request_id_is_echoed(client: TestClient) -> None:
     )
     assert response.status_code == 200
     assert response.headers["X-Request-ID"] == "mobile-request-123"
+    assert response.headers["Cache-Control"] == "no-store"
+    assert response.headers["X-Content-Type-Options"] == "nosniff"
+    assert response.headers["Referrer-Policy"] == "no-referrer"
 
 
 def test_invalid_request_id_is_replaced(client: TestClient) -> None:

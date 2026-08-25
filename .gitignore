@@ -34,3 +34,13 @@ exports/
 tmp/
 *.wav
 *.m4a
+
+# Signing credentials and provider configuration
+*.p8
+*.p12
+*.pem
+*.jks
+*.keystore
+GoogleService-Info.plist
+google-services.json
+credentials.json

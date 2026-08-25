@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import AnyHttpUrl, Field, model_validator
+from pydantic import AnyHttpUrl, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +21,8 @@ class Settings(BaseSettings):
     jwt_secret: str = Field(default="development-only-secret-change-me", min_length=32)
     access_token_minutes: int = Field(default=15, ge=5, le=60)
     refresh_token_days: int = Field(default=30, ge=1, le=90)
+    login_max_failures: int = Field(default=5, ge=3, le=20)
+    login_block_minutes: int = Field(default=15, ge=1, le=120)
     cors_origins: list[AnyHttpUrl] = [AnyHttpUrl("http://localhost:8081")]
     public_app_url: AnyHttpUrl = AnyHttpUrl("http://localhost:8081")
     email_delivery_mode: Literal["file", "smtp"] = "file"
@@ -30,6 +32,16 @@ class Settings(BaseSettings):
     smtp_username: str | None = None
     smtp_password: str | None = None
     smtp_use_tls: bool = True
+    inbound_email_domain: str = "inbound.finanzas.local"
+    inbound_email_secret: str = Field(
+        default="development-inbound-email-secret-change-me",
+        min_length=32,
+    )
+    inbound_email_enabled: bool = False
+    privacy_mode: Literal["strict", "standard"] = "strict"
+    financial_ai_enabled: bool = False
+    openai_api_key: SecretStr | None = None
+    openai_model: str = "gpt-5-mini"
 
     @model_validator(mode="after")
     def validate_deployed_environment(self) -> "Settings":
@@ -45,6 +57,10 @@ class Settings(BaseSettings):
             raise ValueError("Deployed environments require SMTP email delivery")
         if self.public_app_url.host in {"localhost", "127.0.0.1"}:
             raise ValueError("Deployed environments require a public application URL")
+        if "change-me" in self.inbound_email_secret:
+            raise ValueError("Deployed environments require an inbound email secret")
+        if self.privacy_mode == "strict" and self.financial_ai_enabled:
+            raise ValueError("Strict privacy mode does not allow external financial AI")
         return self
 
 

@@ -8,7 +8,7 @@ from app.api.router import api_router
 from app.core.config import get_settings
 from app.core.errors import register_exception_handlers
 from app.core.logging import configure_logging
-from app.core.middleware import RequestContextMiddleware
+from app.core.middleware import RequestContextMiddleware, SecurityHeadersMiddleware
 
 
 @asynccontextmanager
@@ -34,6 +34,10 @@ def create_app() -> FastAPI:
         allow_headers=["Authorization", "Content-Type", "Idempotency-Key", "X-Request-ID"],
     )
     application.add_middleware(RequestContextMiddleware)
+    application.add_middleware(
+        SecurityHeadersMiddleware,
+        production=settings.app_env == "production",
+    )
     register_exception_handlers(application)
     application.include_router(api_router, prefix=settings.api_v1_prefix)
     return application

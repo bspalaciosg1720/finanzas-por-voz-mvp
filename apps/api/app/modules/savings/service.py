@@ -8,9 +8,15 @@ from app.modules.savings.models import SavingsContribution, SavingsGoal
 from app.modules.savings.schemas import (
     SavingsContributionCreate,
     SavingsContributionResponse,
+    SavingsContributionUpdate,
     SavingsGoalCreate,
     SavingsGoalResponse,
     SavingsGoalUpdate,
+)
+from app.modules.transactions.linked import (
+    add_linked_transaction,
+    update_linked_transaction,
+    void_linked_transaction,
 )
 from app.modules.users.models import User
 
@@ -75,10 +81,20 @@ def add_contribution(
     goal_id: uuid.UUID,
     payload: SavingsContributionCreate,
 ) -> SavingsContribution:
-    get_goal(db, user, goal_id)
+    goal = get_goal(db, user, goal_id)
+    transaction = add_linked_transaction(
+        db,
+        user,
+        movement_type="expense",
+        amount_minor=payload.amount_minor,
+        occurred_at=payload.contributed_at,
+        description=f"Aporte a meta: {goal.name}",
+        financial_role="savings_transfer",
+    )
     contribution = SavingsContribution(
         goal_id=goal_id,
         user_id=user.id,
+        transaction_id=transaction.id,
         **payload.model_dump(),
     )
     db.add(contribution)
@@ -109,9 +125,49 @@ def delete_contribution(
             detail="The requested contribution does not exist.",
             error_type="contribution-not-found",
         )
+    void_linked_transaction(db, user, contribution.transaction_id)
     db.delete(contribution)
     db.commit()
     refresh_goal_status(db, user, goal_id)
+
+
+def update_contribution(
+    db: Session,
+    user: User,
+    goal_id: uuid.UUID,
+    contribution_id: uuid.UUID,
+    payload: SavingsContributionUpdate,
+) -> SavingsContribution:
+    goal = get_goal(db, user, goal_id)
+    contribution = db.scalar(
+        select(SavingsContribution).where(
+            SavingsContribution.id == contribution_id,
+            SavingsContribution.goal_id == goal.id,
+            SavingsContribution.user_id == user.id,
+        )
+    )
+    if contribution is None:
+        raise AppError(
+            status=404,
+            title="Contribution not found",
+            detail="The requested contribution does not exist.",
+            error_type="contribution-not-found",
+        )
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(contribution, field, value)
+    update_linked_transaction(
+        db,
+        user,
+        contribution.transaction_id,
+        movement_type="expense",
+        amount_minor=contribution.amount_minor,
+        occurred_at=contribution.contributed_at,
+        description=f"Aporte a meta: {goal.name}",
+    )
+    db.commit()
+    db.refresh(contribution)
+    refresh_goal_status(db, user, goal_id)
+    return contribution
 
 
 def refresh_goal_status(
@@ -165,10 +221,12 @@ def list_goals(db: Session, user: User) -> list[SavingsGoalResponse]:
             SavingsGoalResponse(
                 id=goal.id,
                 name=goal.name,
+                goal_type=goal.goal_type,
                 target_amount_minor=goal.target_amount_minor,
                 saved_amount_minor=saved,
                 currency=goal.currency,
                 target_date=goal.target_date,
+                planned_monthly_minor=goal.planned_monthly_minor,
                 status=goal.status,
                 progress_percent=round((saved / goal.target_amount_minor) * 100, 1),
                 contributions=[

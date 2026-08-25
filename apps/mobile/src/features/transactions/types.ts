@@ -9,6 +9,7 @@ export type Transaction = {
   description: string;
   occurred_at: string;
   source: "manual" | "voice" | "import" | "integration";
+  financial_role: "regular" | "debt_payment" | "savings_transfer" | "obligation_payment";
   status: string;
   deleted_at: string | null;
   created_at: string;
@@ -37,4 +38,23 @@ export type CreateTransactionInput = {
   description: string;
   occurred_at: string;
   source: "manual";
+};
+
+export type TransactionSuggestion = {
+  id: string;
+  transaction_id: string | null;
+  sender_domain: string;
+  type: TransactionType;
+  amount_minor: number;
+  currency: string;
+  description: string;
+  occurred_at: string;
+  confidence: number;
+  status: "pending" | "confirmed" | "discarded";
+  created_at: string;
+  resolved_at: string | null;
+};
+
+export type TransactionInbox = {
+  address: string;
 };

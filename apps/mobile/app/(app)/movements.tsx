@@ -436,7 +436,7 @@ export default function MovementsScreen() {
             <MovementRow
               movement={item}
               category={categories.find((category) => category.id === item.category_id)}
-              onPress={() => openMovement(item)}
+              onPress={item.financial_role === "regular" ? () => openMovement(item) : undefined}
             />
           )}
           ListFooterComponent={
@@ -495,12 +495,13 @@ function MovementRow({
 }: {
   movement: Transaction;
   category?: Category;
-  onPress(): void;
+  onPress?: () => void;
 }) {
   const isIncome = movement.type === "income";
   return (
     <Pressable
-      accessibilityHint="Abre el detalle y permite editar"
+      accessibilityHint={onPress ? "Abre el detalle y permite editar" : "Se administra desde su módulo financiero"}
+      disabled={!onPress}
       onPress={onPress}
       style={({ pressed }) => [styles.row, pressed && styles.pressed]}
     >
@@ -512,7 +513,7 @@ function MovementRow({
           {movement.description || category?.name || "Sin descripción"}
         </Text>
         <Text style={styles.rowMeta}>
-          {category?.name ?? "Sin categoría"} · {formatMovementDate(movement.occurred_at)}
+          {financialRoleLabel(movement, category)} · {formatMovementDate(movement.occurred_at)}
         </Text>
       </View>
       <Text style={[styles.rowAmount, isIncome && styles.incomeAmount]}>
@@ -521,6 +522,13 @@ function MovementRow({
       </Text>
     </Pressable>
   );
+}
+
+function financialRoleLabel(movement: Transaction, category?: Category): string {
+  if (movement.financial_role === "debt_payment") return "Pago de deuda";
+  if (movement.financial_role === "savings_transfer") return "Transferencia de ahorro";
+  if (movement.financial_role === "obligation_payment") return "Pago programado";
+  return category?.name ?? "Sin categoría";
 }
 
 type MovementFormProps = {

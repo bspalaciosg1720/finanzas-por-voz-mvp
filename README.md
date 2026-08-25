@@ -40,14 +40,18 @@ dispositivos físicos, CI remoto, revisión legal y pruebas con usuarios. Consul
 - [Contrato preliminar de API](contracts/README.md)
 - [ADR: monolito modular](docs/architecture/adr-001-modular-monolith.md)
 - [ADR: confirmación de voz](docs/architecture/adr-002-voice-confirmation.md)
+- [Deudas y salud financiera](docs/architecture/debts-and-financial-health.md)
 - [Aceptación de riesgo de la Fase 0](docs/decisions/risk-acceptance-phase-0.md)
 - [Plan de la Fase 1](docs/roadmap/fase-1.md)
 - [Decisión de salida de la Fase 1](docs/decisions/phase-1-exit.md)
 - [Plan de la Fase 2](docs/roadmap/fase-2.md)
 - [Auditoría de dependencias](docs/security/dependency-audit.md)
+- [Privacidad y protección de datos](docs/security/privacy-first.md)
 - [Observabilidad](docs/architecture/observability.md)
 - [Backup y restauración](docs/operations/backup-restore.md)
+- [Despliegue privado de producción](docs/operations/production-deployment.md)
 - [Recuperación de cuenta](docs/architecture/account-recovery.md)
+- [Sugerencias de movimientos desde correo](docs/architecture/email-transaction-suggestions.md)
 
 ## Aplicaciones
 
@@ -62,5 +66,7 @@ La primera versión validará tres trabajos:
 2. Entender el estado financiero del mes.
 3. Detectar el avance de un presupuesto por categoría.
 
-Las integraciones bancarias, el OCR, las recomendaciones mediante IA, los
-presupuestos compartidos y el modo empresarial quedan fuera del MVP.
+La conexión bancaria directa, el OCR, las recomendaciones mediante IA, los
+presupuestos compartidos y el modo empresarial quedan fuera del MVP. Como
+alternativa de bajo riesgo, el MVP permite convertir alertas financieras
+reenviadas por correo en sugerencias que siempre requieren confirmación.

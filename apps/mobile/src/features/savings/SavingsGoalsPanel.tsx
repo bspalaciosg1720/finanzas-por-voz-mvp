@@ -29,6 +29,8 @@ export function SavingsGoalsPanel() {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [targetDate, setTargetDate] = useState("");
+  const [goalType, setGoalType] = useState<"general" | "sinking_fund">("general");
+  const [plannedMonthly, setPlannedMonthly] = useState("");
   const [note, setNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -62,6 +64,8 @@ export function SavingsGoalsPanel() {
     setName("");
     setAmount("");
     setTargetDate("");
+    setGoalType("general");
+    setPlannedMonthly("");
     setFormError(null);
     setMode("goal");
   }
@@ -71,6 +75,8 @@ export function SavingsGoalsPanel() {
     setName(goal.name);
     setAmount(String(goal.target_amount_minor));
     setTargetDate(goal.target_date ?? "");
+    setGoalType(goal.goal_type);
+    setPlannedMonthly(goal.planned_monthly_minor ? String(goal.planned_monthly_minor) : "");
     setFormError(null);
     setMode("goal");
   }
@@ -85,6 +91,7 @@ export function SavingsGoalsPanel() {
 
   async function saveGoal() {
     const target = parseCopAmount(amount);
+    const monthly = plannedMonthly ? parseCopAmount(plannedMonthly) : null;
     if (!target || name.trim().length < 2) {
       setFormError("Escribe un nombre y un monto objetivo válido.");
       return;
@@ -103,6 +110,7 @@ export function SavingsGoalsPanel() {
             name: name.trim(),
             target_amount_minor: target,
             target_date: targetDate || null,
+            planned_monthly_minor: monthly,
           }),
         });
       } else {
@@ -113,6 +121,8 @@ export function SavingsGoalsPanel() {
             target_amount_minor: target,
             currency: user?.default_currency ?? "COP",
             target_date: targetDate || null,
+            goal_type: goalType,
+            planned_monthly_minor: monthly,
           }),
         });
       }
@@ -193,6 +203,35 @@ export function SavingsGoalsPanel() {
     }
   }
 
+  function confirmDeleteContribution(goal: SavingsGoal, contributionId: string) {
+    Alert.alert(
+      "Eliminar aporte",
+      "La meta y el movimiento de caja se recalcularán.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Eliminar", style: "destructive", onPress: () => void deleteContribution(goal.id, contributionId) },
+      ],
+    );
+  }
+
+  async function deleteContribution(goalId: string, contributionId: string) {
+    try {
+      await authenticatedRequest(`/savings-goals/${goalId}/contributions/${contributionId}`, { method: "DELETE" });
+      await load(true);
+    } catch (reason) {
+      setError(reason instanceof ApiError ? reason.message : "No pudimos eliminar el aporte.");
+    }
+  }
+
+  async function enablePayFirst(goal: SavingsGoal) {
+    try {
+      await authenticatedRequest("/financial-strategies/config", { method: "PATCH", body: JSON.stringify({ pay_first_enabled: true, pay_first_goal_id: goal.id }) });
+      Alert.alert("Págate primero activado", `Los próximos ingresos separarán el ahorro seguro hacia ${goal.name}.`);
+    } catch (reason) {
+      setError(reason instanceof ApiError ? reason.message : "No pudimos activar la estrategia.");
+    }
+  }
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -241,7 +280,9 @@ export function SavingsGoalsPanel() {
           <GoalCard
             goal={item}
             onContribute={() => openContribution(item)}
+            onDeleteContribution={(contributionId) => confirmDeleteContribution(item, contributionId)}
             onEdit={() => openEdit(item)}
+            onPayFirst={() => void enablePayFirst(item)}
           />
         )}
         ListEmptyComponent={
@@ -263,6 +304,8 @@ export function SavingsGoalsPanel() {
         saving={saving}
         selected={selected}
         targetDate={targetDate}
+        goalType={goalType}
+        plannedMonthly={plannedMonthly}
         onAmount={setAmount}
         onArchive={confirmArchive}
         onClose={() => !saving && setMode(null)}
@@ -270,6 +313,8 @@ export function SavingsGoalsPanel() {
         onNote={setNote}
         onSave={mode === "contribution" ? addContribution : saveGoal}
         onTargetDate={setTargetDate}
+        onGoalType={setGoalType}
+        onPlannedMonthly={setPlannedMonthly}
       />
     </View>
   );
@@ -278,15 +323,20 @@ export function SavingsGoalsPanel() {
 function GoalCard({
   goal,
   onContribute,
+  onDeleteContribution,
   onEdit,
+  onPayFirst,
 }: {
   goal: SavingsGoal;
   onContribute(): void;
+  onDeleteContribution(contributionId: string): void;
   onEdit(): void;
+  onPayFirst(): void;
 }) {
   const progress = Math.min(goal.progress_percent / 100, 1);
   return (
-    <Pressable onPress={onEdit} style={styles.card}>
+    <View style={styles.card}>
+      <Pressable onPress={onEdit}>
       <View style={styles.cardHeader}>
         <View style={styles.flex}>
           <Text style={styles.title}>{goal.name}</Text>
@@ -310,12 +360,23 @@ function GoalCard({
             : goal.target_date
               ? `Objetivo: ${goal.target_date}`
               : "Sin fecha límite"}
+          {goal.goal_type === "sinking_fund" && goal.planned_monthly_minor ? ` · ${formatMoney(goal.planned_monthly_minor, goal.currency)}/mes` : ""}
         </Text>
         <Pressable onPress={onContribute} style={styles.contributeButton}>
           <Text style={styles.contributeText}>Añadir aporte</Text>
         </Pressable>
       </View>
-    </Pressable>
+      <Pressable onPress={onPayFirst} style={styles.contributeButton}><Text style={styles.contributeText}>Usar para Págate primero</Text></Pressable>
+      </Pressable>
+      {goal.contributions.slice(0, 3).map((contribution) => (
+        <View key={contribution.id} style={styles.contributionRow}>
+          <Text style={styles.meta}>{formatMoney(contribution.amount_minor, goal.currency)} · {new Date(contribution.contributed_at).toLocaleDateString("es-CO")}</Text>
+          <Pressable onPress={() => onDeleteContribution(contribution.id)}>
+            <Text style={styles.deleteContribution}>Eliminar</Text>
+          </Pressable>
+        </View>
+      ))}
+    </View>
   );
 }
 
@@ -328,6 +389,8 @@ function GoalModal({
   saving,
   selected,
   targetDate,
+  goalType,
+  plannedMonthly,
   onAmount,
   onArchive,
   onClose,
@@ -335,6 +398,8 @@ function GoalModal({
   onNote,
   onSave,
   onTargetDate,
+  onGoalType,
+  onPlannedMonthly,
 }: {
   amount: string;
   error: string | null;
@@ -344,6 +409,8 @@ function GoalModal({
   saving: boolean;
   selected: SavingsGoal | null;
   targetDate: string;
+  goalType: "general" | "sinking_fund";
+  plannedMonthly: string;
   onAmount(value: string): void;
   onArchive(): void;
   onClose(): void;
@@ -351,6 +418,8 @@ function GoalModal({
   onNote(value: string): void;
   onSave(): void;
   onTargetDate(value: string): void;
+  onGoalType(value: "general" | "sinking_fund"): void;
+  onPlannedMonthly(value: string): void;
 }) {
   const contribution = mode === "contribution";
   return (
@@ -373,6 +442,8 @@ function GoalModal({
             <>
               <Field label="NOMBRE" onChange={onName} value={name} />
               <Field label="FECHA OBJETIVO (OPCIONAL)" onChange={onTargetDate} value={targetDate} />
+              <View style={styles.typeRow}><Pressable onPress={() => onGoalType("general")} style={[styles.typeChoice, goalType === "general" && styles.typeChoiceActive]}><Text style={styles.meta}>Meta</Text></Pressable><Pressable onPress={() => onGoalType("sinking_fund")} style={[styles.typeChoice, goalType === "sinking_fund" && styles.typeChoiceActive]}><Text style={styles.meta}>Gasto futuro</Text></Pressable></View>
+              {goalType === "sinking_fund" ? <Field inputMode="numeric" label="APORTE MENSUAL PLANEADO" onChange={onPlannedMonthly} value={plannedMonthly} /> : null}
             </>
           ) : null}
           <Field
@@ -488,6 +559,16 @@ const styles = StyleSheet.create({
   },
   contributeButton: { padding: spacing.sm },
   contributeText: { ...typography.caption, color: colors.primary, fontWeight: "700" },
+  contributionRow: {
+    alignItems: "center",
+    borderTopColor: colors.border,
+    borderTopWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: spacing.sm,
+    paddingTop: spacing.sm,
+  },
+  deleteContribution: { ...typography.caption, color: colors.danger, fontWeight: "700" },
   backdrop: {
     backgroundColor: "rgba(32, 38, 36, 0.4)",
     flex: 1,
@@ -521,6 +602,9 @@ const styles = StyleSheet.create({
     color: colors.ink,
     padding: spacing.md,
   },
+  typeRow: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.md },
+  typeChoice: { flex: 1, alignItems: "center", borderColor: colors.border, borderWidth: 1, borderRadius: radius.sm, padding: spacing.sm },
+  typeChoiceActive: { backgroundColor: colors.primarySoft, borderColor: colors.primary },
   action: {
     alignItems: "center",
     backgroundColor: colors.primary,

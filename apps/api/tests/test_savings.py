@@ -51,6 +51,13 @@ def test_goal_progress_completion_and_contribution_removal(client: TestClient) -
     assert goal["status"] == "completed"
     assert len(goal["contributions"]) == 2
 
+    edited = client.patch(
+        f"/api/v1/savings-goals/{goal_id}/contributions/{first.json()['id']}",
+        headers=auth_headers(auth),
+        json={"amount_minor": 500_000},
+    )
+    assert edited.status_code == 200
+
     deleted = client.delete(
         f"/api/v1/savings-goals/{goal_id}/contributions/{second.json()['id']}",
         headers=auth_headers(auth),
@@ -60,7 +67,7 @@ def test_goal_progress_completion_and_contribution_removal(client: TestClient) -
         "/api/v1/savings-goals",
         headers=auth_headers(auth),
     ).json()[0]
-    assert updated["saved_amount_minor"] == 400_000
+    assert updated["saved_amount_minor"] == 500_000
     assert updated["status"] == "active"
 
 
@@ -96,10 +103,7 @@ def test_goal_edit_archive_validation_and_default_currency(client: TestClient) -
         ).status_code
         == 204
     )
-    assert (
-        client.get("/api/v1/savings-goals", headers=auth_headers(auth)).json()
-        == []
-    )
+    assert client.get("/api/v1/savings-goals", headers=auth_headers(auth)).json() == []
 
 
 def test_goals_and_contributions_are_isolated_between_users(
@@ -118,7 +122,4 @@ def test_goals_and_contributions_are_isolated_between_users(
         ).status_code
         == 404
     )
-    assert (
-        client.get("/api/v1/savings-goals", headers=auth_headers(other)).json()
-        == []
-    )
+    assert client.get("/api/v1/savings-goals", headers=auth_headers(other)).json() == []

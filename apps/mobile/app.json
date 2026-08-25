@@ -23,11 +23,15 @@
           "enableBackgroundPlayback": false
         }
       ],
-      "expo-notifications"
+      "expo-notifications",
+      "expo-status-bar"
     ],
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.institutoi3.finanzasvoz"
+      "bundleIdentifier": "com.institutoi3.finanzasvoz",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "com.institutoi3.finanzasvoz"
