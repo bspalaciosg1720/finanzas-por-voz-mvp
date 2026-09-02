@@ -49,6 +49,11 @@ class Settings(BaseSettings):
     openai_api_key: SecretStr | None = None
     openai_model: str = "gpt-5-mini"
 
+    @property
+    def alembic_database_url(self) -> str:
+        """Escape percent signs consumed by Alembic's ConfigParser interpolation."""
+        return self.database_url.replace("%", "%%")
+
     @field_validator("database_url", mode="before")
     @classmethod
     def select_psycopg_driver(cls, value: str) -> str:
