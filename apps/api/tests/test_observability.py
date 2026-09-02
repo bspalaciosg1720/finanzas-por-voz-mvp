@@ -81,3 +81,18 @@ def test_render_postgres_url_selects_installed_psycopg_driver() -> None:
     assert settings.database_url == (
         "postgresql+psycopg://app:secret@private-db:5432/finanzas"
     )
+
+
+def test_personal_production_deployment_can_disable_smtp() -> None:
+    settings = Settings(
+        _env_file=None,
+        app_env="production",
+        database_url="postgresql://app:secret@external-db:5432/finanzas",
+        jwt_secret="a-unique-production-secret-of-32-characters",
+        cors_origins=["https://bspalaciosg1720.github.io"],
+        public_app_url="https://bspalaciosg1720.github.io/finanzas-por-voz-mvp",
+        email_delivery_mode="file",
+        inbound_email_secret="a-distinct-inbound-secret-of-32-characters",
+    )
+
+    assert settings.email_delivery_mode == "file"

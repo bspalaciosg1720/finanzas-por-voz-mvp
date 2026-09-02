@@ -62,8 +62,8 @@ class Settings(BaseSettings):
             raise ValueError("Deployed environments require a unique JWT secret")
         if any(origin.host in {"localhost", "127.0.0.1"} for origin in self.cors_origins):
             raise ValueError("Deployed environments cannot allow localhost CORS origins")
-        if self.email_delivery_mode != "smtp" or not self.smtp_host:
-            raise ValueError("Deployed environments require SMTP email delivery")
+        if self.email_delivery_mode == "smtp" and not self.smtp_host:
+            raise ValueError("SMTP delivery requires an SMTP host")
         if self.public_app_url.host in {"localhost", "127.0.0.1"}:
             raise ValueError("Deployed environments require a public application URL")
         if "change-me" in self.inbound_email_secret:
