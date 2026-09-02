@@ -117,3 +117,11 @@ def test_separate_database_fields_escape_password_safely() -> None:
     assert url.host == "aws-0-us-west-2.pooler.supabase.com"
     assert url.password == "a-password-with-@_]-characters"
     assert url.query["sslmode"] == "require"
+
+
+def test_separate_database_fields_report_exact_missing_values() -> None:
+    with pytest.raises(
+        ValueError,
+        match="Missing database environment variables: DATABASE_USER, DATABASE_PASSWORD",
+    ):
+        Settings(_env_file=None, database_host="db.example.com")

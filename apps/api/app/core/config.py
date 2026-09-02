@@ -60,16 +60,17 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_deployed_environment(self) -> "Settings":
-        separate_database_values = (
-            self.database_host,
-            self.database_user,
-            self.database_password,
-        )
-        if any(value is not None for value in separate_database_values):
-            if not all(value is not None for value in separate_database_values):
-                raise ValueError(
-                    "DATABASE_HOST, DATABASE_USER and DATABASE_PASSWORD must be set together"
-                )
+        separate_database_values = {
+            "DATABASE_HOST": self.database_host,
+            "DATABASE_USER": self.database_user,
+            "DATABASE_PASSWORD": self.database_password,
+        }
+        if any(value is not None for value in separate_database_values.values()):
+            missing = [
+                name for name, value in separate_database_values.items() if value is None
+            ]
+            if missing:
+                raise ValueError(f"Missing database environment variables: {', '.join(missing)}")
             assert self.database_host is not None
             assert self.database_user is not None
             assert self.database_password is not None
