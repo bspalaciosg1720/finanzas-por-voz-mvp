@@ -7,6 +7,7 @@ from app.core.logging import JsonFormatter, request_id_context
 from app.main import create_app
 from fastapi import APIRouter
 from fastapi.testclient import TestClient
+from sqlalchemy.engine import make_url
 
 
 def test_request_id_is_echoed(client: TestClient) -> None:
@@ -96,3 +97,23 @@ def test_personal_production_deployment_can_disable_smtp() -> None:
     )
 
     assert settings.email_delivery_mode == "file"
+
+
+def test_separate_database_fields_escape_password_safely() -> None:
+    settings = Settings(
+        _env_file=None,
+        app_env="production",
+        database_host="aws-0-us-west-2.pooler.supabase.com",
+        database_user="postgres.project-ref",
+        database_password="a-password-with-@_]-characters",
+        jwt_secret="a-unique-production-secret-of-32-characters",
+        cors_origins=["https://bspalaciosg1720.github.io"],
+        public_app_url="https://bspalaciosg1720.github.io/finanzas-por-voz-mvp",
+        email_delivery_mode="file",
+        inbound_email_secret="a-distinct-inbound-secret-of-32-characters",
+    )
+
+    url = make_url(settings.database_url)
+    assert url.host == "aws-0-us-west-2.pooler.supabase.com"
+    assert url.password == "a-password-with-@_]-characters"
+    assert url.query["sslmode"] == "require"
