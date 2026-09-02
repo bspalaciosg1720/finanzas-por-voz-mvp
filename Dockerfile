@@ -17,4 +17,4 @@ RUN uv sync --frozen --no-dev --package finanzas-api
 WORKDIR /app/apps/api
 EXPOSE 8000
 
-CMD ["sh", "-c", "exec /app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --no-server-header --no-proxy-headers"]
+CMD ["sh", "-c", "/app/.venv/bin/alembic upgrade head && exec /app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --no-server-header --no-proxy-headers"]
