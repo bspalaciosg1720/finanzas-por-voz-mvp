@@ -2,6 +2,7 @@ import json
 import logging
 
 import pytest
+from alembic.config import Config
 from app.core.config import Settings
 from app.core.logging import JsonFormatter, request_id_context
 from app.main import create_app
@@ -117,6 +118,11 @@ def test_separate_database_fields_escape_password_safely() -> None:
     assert url.host == "aws-0-us-west-2.pooler.supabase.com"
     assert url.password == "a-password-with-@_]-characters"
     assert url.query["sslmode"] == "require"
+    assert "%40" in settings.database_url
+    assert "%%40" in settings.alembic_database_url
+    alembic_config = Config()
+    alembic_config.set_main_option("sqlalchemy.url", settings.alembic_database_url)
+    assert alembic_config.get_main_option("sqlalchemy.url") == settings.database_url
 
 
 def test_separate_database_fields_report_exact_missing_values() -> None:
