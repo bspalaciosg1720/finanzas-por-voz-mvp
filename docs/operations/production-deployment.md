@@ -59,10 +59,36 @@ bloquea el acceso público directo a la base, genera los secretos internos y eje
 migraciones como tarea previa al despliegue.
 
 En Render selecciona **New → Blueprint**, conecta este repositorio y revisa el costo antes
-de confirmar. Render solicitará `EMAIL_FROM`, `SMTP_HOST`, `SMTP_USERNAME` y
-`SMTP_PASSWORD`; introdúcelos únicamente en su formulario de secretos. El plan declarado
-usa una instancia `starter` para la API y `basic-256mb` para PostgreSQL porque los planes
-gratuitos no ofrecen la persistencia adecuada para datos financieros.
+de confirmar. La configuración gratuita solicita únicamente `DATABASE_URL`; introdúcela
+en el formulario de secretos y nunca dentro del repositorio.
+
+## Despliegue personal gratuito
+
+El `render.yaml` está preparado para una prueba personal sin costo inicial:
+
+- API en una instancia web gratuita de Render.
+- PostgreSQL externo gratuito (recomendado: Supabase), porque PostgreSQL gratuito de
+  Render expira después de 30 días.
+- `DATABASE_URL` se introduce como secreto al crear el Blueprint y debe incluir TLS.
+- Las migraciones se ejecutan antes de iniciar Uvicorn en la única instancia gratuita,
+  ya que el comando `preDeploy` de Render requiere un plan pago.
+- El correo usa el adaptador local y, por tanto, verificación y recuperación por correo
+  quedan deshabilitadas en la práctica. Render gratuito bloquea los puertos SMTP comunes.
+
+Esta modalidad es apropiada para probar la aplicación con una cuenta personal. El
+servicio puede tardar cerca de un minuto en despertar después de 15 minutos sin tráfico.
+Antes de incorporar más usuarios se debe habilitar correo transaccional por HTTPS,
+backups y un procedimiento de migración que no se ejecute dentro del proceso web.
+
+Pasos:
+
+1. Crear un proyecto gratuito en Supabase y copiar la cadena de conexión PostgreSQL con
+   `sslmode=require` desde su panel. No compartirla ni guardarla en Git.
+2. Crear un Blueprint de Render desde este repositorio.
+3. Introducir la cadena en `DATABASE_URL` cuando Render la solicite.
+4. Confirmar que el servicio seleccionado sea `Free` antes de crearlo.
+5. Esperar a que el log muestre la migración completa y el inicio de Uvicorn.
+6. Comprobar `https://<servicio>.onrender.com/api/v1/health`.
 
 No se deben ejecutar migraciones desde cada réplica al arrancar. El hosting debe usar
 una única tarea previa para evitar carreras entre instancias.
