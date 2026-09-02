@@ -8,7 +8,6 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /api/v1/health
-    dockerCommand: sh -c "/app/.venv/bin/alembic upgrade head && exec /app/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000} --no-server-header --no-proxy-headers"
     autoDeployTrigger: commit
     envVars:
       - key: APP_ENV
