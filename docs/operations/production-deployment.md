@@ -59,8 +59,8 @@ bloquea el acceso público directo a la base, genera los secretos internos y eje
 migraciones como tarea previa al despliegue.
 
 En Render selecciona **New → Blueprint**, conecta este repositorio y revisa el costo antes
-de confirmar. La configuración gratuita solicita únicamente `DATABASE_URL`; introdúcela
-en el formulario de secretos y nunca dentro del repositorio.
+de confirmar. La configuración gratuita solicita `DATABASE_USER` y `DATABASE_PASSWORD`;
+introdúcelos en el formulario de secretos y nunca dentro del repositorio.
 
 ## Despliegue personal gratuito
 
@@ -69,7 +69,8 @@ El `render.yaml` está preparado para una prueba personal sin costo inicial:
 - API en una instancia web gratuita de Render.
 - PostgreSQL externo gratuito (recomendado: Supabase), porque PostgreSQL gratuito de
   Render expira después de 30 días.
-- `DATABASE_URL` se introduce como secreto al crear el Blueprint y debe incluir TLS.
+- La conexión se configura en campos separados para evitar errores con caracteres
+  especiales. El backend construye una URL segura y exige TLS automáticamente.
 - Las migraciones se ejecutan antes de iniciar Uvicorn en la única instancia gratuita,
   ya que el comando `preDeploy` de Render requiere un plan pago.
 - El correo usa el adaptador local y, por tanto, verificación y recuperación por correo
@@ -82,10 +83,11 @@ backups y un procedimiento de migración que no se ejecute dentro del proceso we
 
 Pasos:
 
-1. Crear un proyecto gratuito en Supabase y copiar la cadena de conexión PostgreSQL con
-   `sslmode=require` desde su panel. No compartirla ni guardarla en Git.
+1. Crear un proyecto gratuito en Supabase y abrir los datos de conexión de
+   `Session pooler`. No compartirlos ni guardarlos en Git.
 2. Crear un Blueprint de Render desde este repositorio.
-3. Introducir la cadena en `DATABASE_URL` cuando Render la solicite.
+3. Introducir por separado el usuario en `DATABASE_USER` y la contraseña en
+   `DATABASE_PASSWORD`. El host, puerto, nombre y TLS ya están configurados.
 4. Confirmar que el servicio seleccionado sea `Free` antes de crearlo.
 5. Esperar a que el log muestre la migración completa y el inicio de Uvicorn.
 6. Comprobar `https://<servicio>.onrender.com/api/v1/health`.

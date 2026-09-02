@@ -3,6 +3,7 @@ from typing import Literal
 
 from pydantic import AnyHttpUrl, Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import URL
 
 
 class Settings(BaseSettings):
@@ -18,6 +19,11 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
     log_level: str = "INFO"
     database_url: str = "postgresql+psycopg://app:change-me@localhost:5432/finanzas"
+    database_host: str | None = None
+    database_port: int = Field(default=5432, ge=1, le=65535)
+    database_name: str = "postgres"
+    database_user: str | None = None
+    database_password: SecretStr | None = None
     jwt_secret: str = Field(default="development-only-secret-change-me", min_length=32)
     access_token_minutes: int = Field(default=15, ge=5, le=60)
     refresh_token_days: int = Field(default=30, ge=1, le=90)
@@ -54,6 +60,29 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_deployed_environment(self) -> "Settings":
+        separate_database_values = (
+            self.database_host,
+            self.database_user,
+            self.database_password,
+        )
+        if any(value is not None for value in separate_database_values):
+            if not all(value is not None for value in separate_database_values):
+                raise ValueError(
+                    "DATABASE_HOST, DATABASE_USER and DATABASE_PASSWORD must be set together"
+                )
+            assert self.database_host is not None
+            assert self.database_user is not None
+            assert self.database_password is not None
+            self.database_url = URL.create(
+                drivername="postgresql+psycopg",
+                username=self.database_user,
+                password=self.database_password.get_secret_value(),
+                host=self.database_host,
+                port=self.database_port,
+                database=self.database_name,
+                query={"sslmode": "require"},
+            ).render_as_string(hide_password=False)
+
         if self.app_env not in {"staging", "production"}:
             return self
         if "change-me" in self.database_url:
